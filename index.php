@@ -1,3 +1,4 @@
 <?php
-echo "Hello world"
+include_once("./xtable.php");
+include_once("./group_table.php");
 ?>
