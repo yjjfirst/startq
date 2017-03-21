@@ -47,24 +47,83 @@ table.imagetable td.green{
 	border-style: solid;
 	border-color: #999999;
 }
-
 </style>
 
+<?php
+include_once("./group_xtable.php");
+?>
 <body>
+<?php
+foreach($group_tables as $table)
+{
+	$group_name = key($table);
+	$total=array();
+	array_push($total,"Total");
+	$rows = current($table);
+?>
 <!-- Table goes in the document BODY -->
-<table class="imagetable">
-<tr>
-<th>Group Name</th>
-</tr>
-<tr>
-	<th>Info Header 1</th><th>Info Header 2</th><th>Info Header 3</th>
-</tr>
-<tr>
-	<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
-</tr>
-<tr>
-	<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
-</tr>
-</table>
+		<table class="imagetable">
+			<tr>
+				<th><?php echo $group_name?></th>
+			</tr>
+			<tr>
+				<?php
+				foreach($group_column_name as $title)
+				{
+				?>
+					<th><?php echo $title?></th>
+				<?php
+				}
+				?>
+			</tr>
+			<?php
+			foreach($rows as $row)
+			{
+				if($row == 10)
+				{
+					//skip the obj 10;
+					continue;
+				}
+			?>
+				<tr>
+					<?php
+					for($j=1;$j<count($row);$j++)
+					{
+						if($j>=count($total))
+						{
+							array_push($total,$row[$j]);  
+						}
+						else
+							$total[$j]+=$row[$j];
+					}
+					$row = secs_to_strtime($row);
+					foreach($row as $item)
+					{
+					?>
+						<td><?php echo $item?></td>
+					<?php
+					}
+					?>
+				</tr>
+			<?php
+			}
+			$total = secs_to_strtime($total);
+			foreach($total as $item)
+			{
+			?>
+				<td><?php echo $item?></td>
+			<?php
+			}
+			?>
+			<tr>
+				<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
+			</tr>
+			<tr>
+				<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
+			</tr>
+		</table>
+<?php
+}
+?>
 </body>
 </html>
