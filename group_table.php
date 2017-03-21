@@ -50,8 +50,11 @@ table.imagetable td.green{
 </style>
 
 <?php
-global $groups;
+global $config_groups;
 include_once './group_xtable.php';
+include_once './group_debugging_data.php';
+
+$groups=$debugging_groups;
 ?>
 <body>
 <?php

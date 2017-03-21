@@ -1,8 +1,8 @@
 <?php
 include_once("./parser.php");
-$groups = $ini_array["groups"];
+$config_groups = $ini_array["groups"];
 
-$group_column_names = array("id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
+$group_column_names = array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function time_strformat($secs) 
 {
@@ -73,8 +73,8 @@ function build_group_table(&$conf_groups,$_column_names)
    }
     $group_tables = $conf_groups;
   }
-build_group_table($groups,$group_column_names);
-//print_r($groups);
+build_group_table($config_groups,$group_column_names);
+//print_r($config_groups);
 //show_group_html_table($group_tables,$group_column_names);
 
 ?>
