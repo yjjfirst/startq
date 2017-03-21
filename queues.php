@@ -102,46 +102,42 @@ class A implements IEventListener
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-try
-{
-    $options = array(
-        'host' => 'localhost',
-        'port' => 5038,
-        'username' => 'hello',
-        'secret' => 'world',
-        'connect_timeout' => 10,
-        'read_timeout' => 10,
-        'scheme' => 'tcp://' // try tls://
-    );
-    $a = new ClientImpl($options);
-    $a->registerEventListener(new A());
-    $a->open();
-/*
-    var_dump($a->send(new QueueStatusAction()));
-    var_dump($a->send(new QueueStatusAction()));
-    var_dump($a->send(new QueueStatusAction()));
-    var_dump($a->send(new QueuePauseAction('Agent/123')));
-    var_dump($a->send(new QueueUnpauseAction('Agent/123')));
-    var_dump($a->send(new QueueStatusAction()));
-    var_dump($a->send(new QueueSummaryAction()));
-    var_dump($a->send(new QueueLogAction('a', 'asdasd')));
-    var_dump($a->send(new QueuePenaltyAction('Agent/123', '123')));
-    var_dump($a->send(new QueueResetAction('a')));
-    var_dump($a->send(new QueueRuleAction('a')));
 
-    var_dump($a->send(new QueueReloadAction('a', true, true, true)));
-    var_dump($a->send(new QueueRemoveAction('a', 'Agent/123')));
-    var_dump($a->send(new QueuesAction()));
-    var_dump($a->send(new QueuesAction())->getRawContent());
-*/
-    $time = time();
-    while(true)//(time() - $time) < 60) // Wait for events.
-    {
-        usleep(1000); // 1ms delay
-        // Since we declare(ticks=1) at the top, the following line is not necessary
-        $a->process();
-    }
-    $a->close(); // send logoff and close the connection.
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+$options = array(
+    'host' => '192.168.10.236',
+    'port' => 5038,
+    'username' => 'admin',
+    'secret' => '18615ae90bd71af63f90664da14b2459',
+    'connect_timeout' => 10,
+    'read_timeout' => 10,
+    'scheme' => 'tcp://' // try tls://
+);
+
+function get_queues_status($options)
+{    
+
+    $a = new ClientImpl($options);
+    $a->open();
+
+    $queues_status = ($a->send(new QueueStatusAction()));
+    $events = $queues_status->getEvents();
+        
+    $a->close();
+    return $events;
+        
 }
+
+function get_queues_summary($options)
+{
+    $a = new ClientImpl($options);
+    $a->open();
+
+    $queues_status = ($a->send(new QueueSummaryAction()));
+    $events = $queues_status->getEvents();
+        
+    $a->close();
+    return $events;
+}
+    
+var_dump(get_queues_status($options));
+var_dump(get_queues_summary($options));
