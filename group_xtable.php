@@ -18,7 +18,7 @@ function secs_to_strtime(&$row)
 {
 	for($i=0;$i<count($row);$i++)
 	{
-		if($i == 2 || $i == 6)
+		if($i == 1 || $i == 5)
 		{
 			$row[$i]= time_strformat($row[$i]);
 		}
@@ -28,9 +28,9 @@ function secs_to_strtime(&$row)
 
 function _init_group_row(&$rows)
 {
-	$data_raw_init_values = array("","1","60","0","0","0","50","0","0","0"); 
-	$i=1;
-	for($i=1;$i<count($data_raw_init_values);$i++)
+	$data_raw_init_values = array("0","0","0","0","0","0","0","0","0"); 
+
+	for($i=0;$i<count($data_raw_init_values);$i++)
 	{
 		array_push($rows,$data_raw_init_values[$i]);
 	}
@@ -48,9 +48,9 @@ function conf_group_table(&$group,&$group_name, &$rows)
 	while($_name = current($queue_row)) 
     { 
 	 $row = array();
-     $row[0] = $_name;
+     //$row[0] = $_name;
 	 _init_group_row($row);
-	 array_push($table,$row);      
+	 $table["$_name"]=$row;      
      next($queue_row);
     }
 	unset($group["$group_name"]);

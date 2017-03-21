@@ -64,14 +64,14 @@ for($i=0;$i<count($groups);next($groups),$i++)
 {
 	//print_r($groups
 	$group_name = key($groups);
-	$total=array();
+	$total_items=array();
 	array_push($total,"Total");
-	$rows = current($groups);
+	$queues = current($groups);
 ?>
 <!-- Table goes in the document BODY -->
 		<table class="imagetable">
 			<tr>
-				<th><?php echo $group_name?></th>
+				<th><?php echo "Group Name: ".$group_name?></th>
 			</tr>
 			<tr>
 				<?php
@@ -84,22 +84,25 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				?>
 			</tr>
 			<?php
-			foreach($rows as $row)
+			for($i=0;$i<count($queues);$i++,next($queues))
 			{
+				$queue_name=key($queues);
 			?>
 				<tr>
+				    <td><?php echo $queue_name?></td>
 					<?php
-					for($j=1;$j<count($row);$j++)
+					$queue=$queues["$queue_name"];
+					for($j=0;$j<count($queue);$j++)
 					{
-						if($j>=count($total))
+						if($j>=count($total_items))
 						{
-							array_push($total,$row[$j]);  
+							array_push($total_items,$queue[$j]);  
 						}
 						else
-							$total[$j]+=$row[$j];
+							$total_items[$j]+=$queue[$j];
 					}
-					$row = secs_to_strtime($row);
-					foreach($row as $item)
+					$queue = secs_to_strtime($queue);
+					foreach($queue as $item)
 					{
 					?>
 						<td><?php echo $item?></td>
@@ -109,20 +112,28 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				</tr>
 			<?php
 			}
-			$total = secs_to_strtime($total);
-			foreach($total as $item)
-			{
+			$total_items = secs_to_strtime($total_items);
 			?>
-				<td><?php echo $item?></td>
-			<?php
-			}
-			?>
+			<tr>
+				<td><?php echo "Total"?></td>
+				
+				<?php
+				foreach($total_items as $item)
+				{
+				?>
+					<td><?php echo $item?></td>
+				<?php
+				}
+				?>
+			</tr>
+<!--
 			<tr>
 				<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
 			</tr>
 			<tr>
 				<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
 			</tr>
+-->
 		</table>
 <?php
 }

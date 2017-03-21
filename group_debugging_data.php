@@ -46,11 +46,9 @@
 	 
     function generate_queue_array(&$queue_array)
 	{
-		$randCharObj = new RandChar();
 	    $randDigitObj = new RandDigit();
 		
-		$queue_array[0]=$randCharObj->getRandChar(32);
-		for($i=1;$i<10;$i++)
+		for($i=0;$i<9;$i++)
 		{
 			$queue_array[$i]=$randDigitObj->getRandDigit(4);
 		}
@@ -61,11 +59,14 @@
 		global $debugging_groups;
 		
 		$randCharObj = new RandChar();
-		$group_name=$randCharObj->getRandChar(10);
+		$group_name=$randCharObj->getRandChar(16);
 		$queues=array();
 		for($i=0;$i<$queue_count;$i++)
 		{
-			 generate_queue_array($queues[$i]);
+			$queue_items=null;
+			$queue_name=$randCharObj->getRandChar(32);
+			generate_queue_array($queue_items);
+			$queues["$queue_name"]=$queue_items;
 		}
 		//print_r($queues);
 		$debugging_groups["$group_name"]=$queues;
