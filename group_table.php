@@ -50,7 +50,9 @@ table.imagetable td.green{
 </style>
 
 <?php
-include_once("./group_xtable.php");
+global $group_tables;
+include_once './group_xtable.php';
+
 ?>
 <body>
 <?php
@@ -68,7 +70,7 @@ foreach($group_tables as $table)
 			</tr>
 			<tr>
 				<?php
-				foreach($group_column_name as $title)
+				foreach($group_column_names as $title)
 				{
 				?>
 					<th><?php echo $title?></th>
