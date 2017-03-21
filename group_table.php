@@ -50,16 +50,18 @@ table.imagetable td.green{
 </style>
 
 <?php
-include_once("./group_xtable.php");
+global $groups;
+include_once './group_xtable.php';
 ?>
 <body>
 <?php
-foreach($group_tables as $table)
+for($i=0;$i<count($groups);next($groups),$i++)
 {
-	$group_name = key($table);
+	//print_r($groups
+	$group_name = key($groups);
 	$total=array();
 	array_push($total,"Total");
-	$rows = current($table);
+	$rows = current($groups);
 ?>
 <!-- Table goes in the document BODY -->
 		<table class="imagetable">
@@ -68,7 +70,7 @@ foreach($group_tables as $table)
 			</tr>
 			<tr>
 				<?php
-				foreach($group_column_name as $title)
+				foreach($group_column_names as $title)
 				{
 				?>
 					<th><?php echo $title?></th>
@@ -79,11 +81,6 @@ foreach($group_tables as $table)
 			<?php
 			foreach($rows as $row)
 			{
-				if($row == 10)
-				{
-					//skip the obj 10;
-					continue;
-				}
 			?>
 				<tr>
 					<?php
