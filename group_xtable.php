@@ -4,17 +4,7 @@ $config_groups = $ini_array["groups"];
 
 $group_column_names = array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function time_strformat($secs) 
-{
-  $hour = floor($secs/3600);
-  $minute = floor(($secs-3600*$hour)/60);
-  $second = floor((($secs-3600*$hour)-60*$minute)%60);
-  $ret_fmt= sprintf("%02d:%02d:%02d", $hour,$minute,$second);
-  
-  return $ret_fmt;
-}
-
-function secs_to_strtime(&$row)
+function group_secs_to_strtime(&$row)
 {
 	for($i=0;$i<count($row);$i++)
 	{
