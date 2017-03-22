@@ -1,11 +1,18 @@
 <?php
-global $config_agents;
 global $debugging_agents;
-include_once './agent_xtable.php';
+include_once './xtable.php';
 include_once './debugging_data.php';
 
+/////////////////////////////////////////////
+$agent_table = new xtable();
+$agent_table->data_source=$ini_array["agents"];
+$agent_table->column_names = array("Agent Id","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
+$agent_table->init_values=array("0","0","0","0","0","0","0","0");
+$agent_table->time_items=array(2,7);
+$conf_agents = $agent_table->build_table();
+/////////////////////////////////////////////
+
 $agents=$debugging_agents;
-//print_r($agents);
 for($i=0;$i<count($agents);next($agents),$i++)
 {
 	//print_r($agents
@@ -19,7 +26,7 @@ for($i=0;$i<count($agents);next($agents),$i++)
 			</tr>
 			<tr>
 				<?php
-				foreach($agent_column_names as $title)
+				foreach($agent_table->column_names as $title)
 				{
 				?>
 					<th><?php echo $title?></th>
@@ -47,7 +54,7 @@ for($i=0;$i<count($agents);next($agents),$i++)
 				    <td <?php echo $td_class?>><?php echo $agent_name?></td>
 					<?php
 					$number=$agent["$agent_name"];
-					$number = agent_secs_to_strtime($number);
+					$number = $agent_table->secs_to_strtime($number);
 					foreach($number as $item)
 					{
 					?>

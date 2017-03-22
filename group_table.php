@@ -1,11 +1,19 @@
 <?php
-global $config_groups;
 global $debugging_groups;
-include_once './group_xtable.php';
+include_once './xtable.php';
 include_once './debugging_data.php';
+//////////////////////////////////////////////////////////////////////////////
 
-$groups=$debugging_groups;
-//print_r($groups);
+$group_table = new xtable();
+$group_table->data_source=$ini_array["groups"];
+$group_table->column_names = array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
+$group_table->init_values=array("0","0","0","0","0","0","0","0","0");
+$group_table->time_items=array(1,5);
+$conf_groups = $group_table->build_table();
+
+/////////////////////////////////////////////////////////////////////////////
+$groups=$conf_groups;
+
 for($i=0;$i<count($groups);next($groups),$i++)
 {
 	//print_r($groups
@@ -20,7 +28,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
 			</tr>
 			<tr>
 				<?php
-				foreach($group_column_names as $title)
+				foreach($group_table->column_names as $title)
 				{
 				?>
 					<th><?php echo $title?></th>
@@ -57,7 +65,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
 						else
 							$total_items[$j]+=$queue[$j];
 					}
-					$queue = group_secs_to_strtime($queue);
+					$queue = $group_table->secs_to_strtime($queue);
 					foreach($queue as $item)
 					{
 					?>
@@ -68,7 +76,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				</tr>
 			<?php
 			}
-			$total_items = group_secs_to_strtime($total_items);
+			$total_items = $group_table->secs_to_strtime($total_items);
 			$rows++;
 			if($rows%2 == 0)
 			{	 
