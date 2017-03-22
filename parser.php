@@ -18,7 +18,7 @@ class parser
 		$data_source["$table_name"]=$new_table;
 	}
 	
-	public function init($conf_path='queues.conf')
+	public function __construct($conf_path='queues.conf')
 	{
 		$this->ini_array = parse_ini_file($conf_path, true);
 	}

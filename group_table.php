@@ -4,7 +4,6 @@ include_once './xtable.php';
 include_once './debugging_data.php';
 //////////////////////////////////////////////////////////////////////////////
 $parser = new parser();
-$parser->init();
 
 $group_table = new xtable();
 $group_table->set_init_values($parser->get_group_init_values());

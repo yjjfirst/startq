@@ -4,7 +4,6 @@ include_once './xtable.php';
 include_once './debugging_data.php';
 /////////////////////////////////////////////
 $parser = new parser();
-$parser->init();
 
 $agent_table = new xtable();
 $agent_table->set_init_values($parser->get_agent_init_values());
