@@ -3,12 +3,9 @@ include_once("./parser.php");
 
 class xtable
 {
-    //private $tit,$arr,$fons,$sextra;
-    public $row_init_array, $data_source,$cloumn_names,$init_values,$time_items; 
-	
-	private $table_name;
-	
-	
+	public  $column_names;
+	private $init_values,$time_items,$array_objs; 
+
 	private function _init_row_data(&$_init_rows)
 	{
 		for($i=0;$i<count($this->init_values);$i++)
@@ -25,21 +22,6 @@ class xtable
 	  
 	  return $ret_fmt;
 	}
-    private function _fill_table($name, $row_names_str)
-	{
-		$new_table = array();
-		$this->table_name = $name;
-		$row_to_add = explode(",",$row_names_str);
-		while($_name = current($row_to_add)) 
-		{ 
-		 $new_row = array();
-		 $this->_init_row_data($new_row);
-		 $new_table["$_name"]=$new_row;      
-		 next($row_to_add);
-		}
-		unset($this->data_source["$this->table_name"]);
-		$this->data_source["$this->table_name"]=$new_table;
-	}
 	///////////////////////////////////////////////////////////////////////////////////
     public function secs_to_strtime(&$rows_to_adjust)
     {
@@ -52,21 +34,48 @@ class xtable
 		}
 	    return $rows_to_adjust;
 	}
-	
-	public function build_table()
+	public function set_defaults($table_objs=NULL)
 	{
-	   $i=0;
-	   foreach($this->data_source as $key=>$value)
-	   {
-		   $this->_fill_table($key,$value);
-		   $i++;	
-	   }
-	   return $this->data_source;
+		if(!empty($table_objs))
+		{
+			$this->array_objs=$table_objs;
+		}
+		foreach($this->array_objs as $keys=>$values)
+		{
+			if(is_array($values))
+			{
+				foreach($values as $key=>$value)
+				{
+					$new_row=array();
+					$this->_init_row_data($new_row);
+					unset($this->array_objs[$keys][$key]);
+					$this->array_objs[$keys][$key]=$new_row;
+				}
+			}
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////
+	public function set_init_values($_values)
+	{
+		$this->init_values=$_values;
+	}
+	public function set_time_items($_time_items)
+	{
+		$this->time_items=$_time_items;
+	}
+	public function set_column_names($_names)
+	{
+		$this->column_names=$_names;
+	}
+	public function set_array_objs($_array_objs)
+	{
+		$this->array_objs=$_array_objs;
+	}
+	public function get_array_objs()
+	{
+		return $this->array_objs;
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////
-
-
 ?>
+
+

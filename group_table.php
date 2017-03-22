@@ -3,16 +3,18 @@ global $debugging_groups;
 include_once './xtable.php';
 include_once './debugging_data.php';
 //////////////////////////////////////////////////////////////////////////////
+$parser = new parser();
+$parser->init();
 
 $group_table = new xtable();
-$group_table->data_source=$ini_array["groups"];
-$group_table->column_names = array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
-$group_table->init_values=array("0","0","0","0","0","0","0","0","0");
-$group_table->time_items=array(1,5);
-$conf_groups = $group_table->build_table();
+$group_table->set_init_values($parser->get_group_init_values());
+$group_table->set_time_items($parser->get_group_time_items());
+$group_table->set_column_names($parser->get_group_cloumn_names());
+$group_table->set_array_objs($parser->get_groups_objs());
 
+$group_table->set_defaults();
 /////////////////////////////////////////////////////////////////////////////
-$groups=$conf_groups;
+$groups=$group_table->get_array_objs();
 
 for($i=0;$i<count($groups);next($groups),$i++)
 {

@@ -2,17 +2,20 @@
 global $debugging_agents;
 include_once './xtable.php';
 include_once './debugging_data.php';
-
 /////////////////////////////////////////////
+$parser = new parser();
+$parser->init();
+
 $agent_table = new xtable();
-$agent_table->data_source=$ini_array["agents"];
-$agent_table->column_names = array("Agent Id","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
-$agent_table->init_values=array("0","0","0","0","0","0","0","0");
-$agent_table->time_items=array(2,7);
-$conf_agents = $agent_table->build_table();
+$agent_table->set_init_values($parser->get_agent_init_values());
+$agent_table->set_time_items($parser->get_agent_time_items());
+$agent_table->set_column_names($parser->get_agent_cloumn_names());
+$agent_table->set_array_objs($parser->get_agents_objs());
+
+$agent_table->set_defaults();
 /////////////////////////////////////////////
 
-$agents=$debugging_agents;
+$agents=$agent_table->get_array_objs();
 for($i=0;$i<count($agents);next($agents),$i++)
 {
 	//print_r($agents
