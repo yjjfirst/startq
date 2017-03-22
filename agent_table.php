@@ -2,7 +2,7 @@
 global $config_agents;
 global $debugging_agents;
 include_once './agent_xtable.php';
-include_once './group_debugging_data.php';
+include_once './debugging_data.php';
 
 $agents=$debugging_agents;
 //print_r($agents);
@@ -28,19 +28,30 @@ for($i=0;$i<count($agents);next($agents),$i++)
 				?>
 			</tr>
 			<?php
+            $rows = 0;
+			$td_class = "class=\"odd\"";
 			for($j=0;$j<count($agent);$j++,next($agent))
 			{
+				$rows++;
+				if($rows%2 == 0)
+			    {	 
+				    $td_class="class=\"even\"";
+			    }
+			    else
+			    {
+				    $td_class="class=\"odd\"";
+			    }
 				$agent_name=key($agent);
 			?>
 				<tr>
-				    <td><?php echo $agent_name?></td>
+				    <td <?php echo $td_class?>><?php echo $agent_name?></td>
 					<?php
 					$number=$agent["$agent_name"];
 					$number = agent_secs_to_strtime($number);
 					foreach($number as $item)
 					{
 					?>
-						<td><?php echo $item?></td>
+						<td <?php echo $td_class?>><?php echo $item?></td>
 					<?php
 					}
 					?>

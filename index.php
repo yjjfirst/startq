@@ -16,12 +16,37 @@ table.imagetable th {
 	border-style: solid;
 	border-color: #999999;
 }
-table.imagetable td {
-	background:#dcddc0 url('./images/cell-grey.jpg');
+
+table.imagetable th.top {
+	background:#CCCCCC;
 	border-width: 1px;
 	padding: 8px;
 	border-style: solid;
 	border-color: #999999;
+}
+
+table.imagetable td.odd {
+	background:#FFFFFF;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.even {
+	background:#F9F9F9;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.blank {
+	background:#FFFFFF;
+	border-width: 1px;
+	padding: 10px;
+	border-style: solid;
+	border-color: #FFFFFF;
 }
 
 table.imagetable td.yellow{
@@ -49,6 +74,15 @@ table.imagetable td.green{
 }
 </style>
 <body>
+<table class="imagetable" width="100%">
+<tr>
+<th class="top"  align="left">Call Centre Queues and Agents</th>
+</tr>
+<tr>
+<td class="blank" width="100%"></td>
+</tr>
+</table>
+
 <?php
 //include_once("./xtable.php");
 include_once("./group_table.php");

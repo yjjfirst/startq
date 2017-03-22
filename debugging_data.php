@@ -102,14 +102,14 @@
 		//print_r($debugging_agents);
 	}
 	///////////////////////////////////////////////////////////////////////////////////////
-	generate_debugging_group(2);
-	generate_debugging_group(3);
+	generate_debugging_group(15);
+	generate_debugging_group(10);
 
 	//generate_debugging_group(3);
 	//generate_debugging_group(3);
 	//generate_debugging_group(5);
 	///////////////////////////////////////////////////////////////////////////////////////
-	  generate_debugging_agent(2);
+	  generate_debugging_agent(15);
 	  generate_debugging_agent(6);
 	  
 ?>

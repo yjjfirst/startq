@@ -29,12 +29,23 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				?>
 			</tr>
 			<?php
+			$rows = 0;
+			$td_class = "class=\"odd\"";
 			for($k=0;$k<count($queues);$k++,next($queues))
 			{
+				$rows++;
 				$queue_name=key($queues);
+				if($rows%2 == 0)
+				{	 
+					$td_class="class=\"even\"";
+				}
+				else
+				{
+					$td_class="class=\"odd\"";
+				}
 			?>
 				<tr>
-				    <td><?php echo $queue_name?></td>
+				    <td <?php echo $td_class?>><?php echo $queue_name?></td>
 					<?php
 					$queue=$queues["$queue_name"];
 					for($j=0;$j<count($queue);$j++)
@@ -50,7 +61,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
 					foreach($queue as $item)
 					{
 					?>
-						<td><?php echo $item?></td>
+						<td <?php echo $td_class?>><?php echo $item?></td>
 					<?php
 					}
 					?>
@@ -58,15 +69,23 @@ for($i=0;$i<count($groups);next($groups),$i++)
 			<?php
 			}
 			$total_items = group_secs_to_strtime($total_items);
+			$rows++;
+			if($rows%2 == 0)
+			{	 
+				$td_class="class=\"even\"";
+			}
+			else
+			{
+				$td_class="class=\"odd\"";
+			}
 			?>
 			<tr>
-				<td><?php echo "Total"?></td>
-				
+				<td <?php echo $td_class?>><?php echo "Total"?></td>
 				<?php
 				foreach($total_items as $item)
 				{
 				?>
-					<td><?php echo $item?></td>
+					<td <?php echo $td_class?>><?php echo $item?></td>
 				<?php
 				}
 				?>
