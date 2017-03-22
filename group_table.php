@@ -1,76 +1,34 @@
-<html>
-<!-- CSS goes in the document HEAD or added to your external stylesheet -->
-<style type="text/css">
-table.imagetable {
-	font-family: verdana,arial,sans-serif;
-	font-size:11px;
-	color:#333333;
-	border-width: 1px;
-	border-color: #999999;
-	border-collapse: collapse;
-}
-table.imagetable th {
-	background:#b5cfd2 url('./images/cell-blue.jpg');
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #999999;
-}
-table.imagetable td {
-	background:#dcddc0 url('./images/cell-grey.jpg');
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #999999;
-}
-
-table.imagetable td.yellow{
-	background:#FFCC00;
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #999999;
-}
-	
-table.imagetable td.red{
-	background:#FF0000;
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #999999;
-}
-
-table.imagetable td.green{
-	background:#00FF00;
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #999999;
-}
-</style>
-
 <?php
-global $groups;
-include_once './group_xtable.php';
-?>
-<body>
-<?php
+global $debugging_groups;
+include_once './xtable.php';
+include_once './debugging_data.php';
+//////////////////////////////////////////////////////////////////////////////
+
+$group_table = new xtable();
+$group_table->data_source=$ini_array["groups"];
+$group_table->column_names = array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
+$group_table->init_values=array("0","0","0","0","0","0","0","0","0");
+$group_table->time_items=array(1,5);
+$conf_groups = $group_table->build_table();
+
+/////////////////////////////////////////////////////////////////////////////
+$groups=$conf_groups;
+
 for($i=0;$i<count($groups);next($groups),$i++)
 {
 	//print_r($groups
 	$group_name = key($groups);
-	$total=array();
-	array_push($total,"Total");
-	$rows = current($groups);
+	$total_items=array();
+	$queues = current($groups);
 ?>
 <!-- Table goes in the document BODY -->
 		<table class="imagetable">
 			<tr>
-				<th><?php echo $group_name?></th>
+				<th><?php echo "Group Name: ".$group_name?></th>
 			</tr>
 			<tr>
 				<?php
-				foreach($group_column_names as $title)
+				foreach($group_table->column_names as $title)
 				{
 				?>
 					<th><?php echo $title?></th>
@@ -79,48 +37,76 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				?>
 			</tr>
 			<?php
-			foreach($rows as $row)
+			$rows = 0;
+			$td_class = "class=\"odd\"";
+			for($k=0;$k<count($queues);$k++,next($queues))
 			{
+				$rows++;
+				$queue_name=key($queues);
+				if($rows%2 == 0)
+				{	 
+					$td_class="class=\"even\"";
+				}
+				else
+				{
+					$td_class="class=\"odd\"";
+				}
 			?>
 				<tr>
+				    <td <?php echo $td_class?>><?php echo $queue_name?></td>
 					<?php
-					for($j=1;$j<count($row);$j++)
+					$queue=$queues["$queue_name"];
+					for($j=0;$j<count($queue);$j++)
 					{
-						if($j>=count($total))
+						if($j>=count($total_items))
 						{
-							array_push($total,$row[$j]);  
+							array_push($total_items,$queue[$j]);  
 						}
 						else
-							$total[$j]+=$row[$j];
+							$total_items[$j]+=$queue[$j];
 					}
-					$row = secs_to_strtime($row);
-					foreach($row as $item)
+					$queue = $group_table->secs_to_strtime($queue);
+					foreach($queue as $item)
 					{
 					?>
-						<td><?php echo $item?></td>
+						<td <?php echo $td_class?>><?php echo $item?></td>
 					<?php
 					}
 					?>
 				</tr>
 			<?php
 			}
-			$total = secs_to_strtime($total);
-			foreach($total as $item)
+			$total_items = $group_table->secs_to_strtime($total_items);
+			$rows++;
+			if($rows%2 == 0)
+			{	 
+				$td_class="class=\"even\"";
+			}
+			else
 			{
-			?>
-				<td><?php echo $item?></td>
-			<?php
+				$td_class="class=\"odd\"";
 			}
 			?>
+			<tr>
+				<td <?php echo $td_class?>><?php echo "Total"?></td>
+				<?php
+				foreach($total_items as $item)
+				{
+				?>
+					<td <?php echo $td_class?>><?php echo $item?></td>
+				<?php
+				}
+				?>
+			</tr>
+<!--
 			<tr>
 				<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
 			</tr>
 			<tr>
 				<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
 			</tr>
+-->
 		</table>
 <?php
 }
 ?>
-</body>
-</html>

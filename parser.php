@@ -5,6 +5,6 @@
 
 // Parse with sections
 $ini_array = parse_ini_file("queues.conf", true);
-//print_r($ini_array);
+//print_r($ini_array); 
 
 ?>
