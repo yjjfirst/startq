@@ -52,7 +52,7 @@ table.imagetable td.blank {
 table.imagetable td.yellow{
 	background:#FFCC00;
 	border-width: 1px;
-	padding: 8px;
+	padding: 2px;
 	border-style: solid;
 	border-color: #999999;
 }
@@ -60,7 +60,7 @@ table.imagetable td.yellow{
 table.imagetable td.red{
 	background:#FF0000;
 	border-width: 1px;
-	padding: 8px;
+	padding: 2px;
 	border-style: solid;
 	border-color: #999999;
 }
@@ -68,7 +68,7 @@ table.imagetable td.red{
 table.imagetable td.green{
 	background:#00FF00;
 	border-width: 1px;
-	padding: 8px;
+	padding: 2px;
 	border-style: solid;
 	border-color: #999999;
 }

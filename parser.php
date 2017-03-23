@@ -1,9 +1,9 @@
 <?php
 class parser
 {	
-	private $ini_array,$group_objs,$agent_objs;
+	private $ini_array,$group_objs,$agent_objs,$group_column_color;
 	
-    private function parse_with_obj(&$data_source, $name, $row_names_str)
+    private function parse_to_obj(&$data_source, $name, $row_names_str)
 	{
 		$new_table = array();
 		$table_name = $name;
@@ -30,7 +30,7 @@ class parser
 	   $fetch_src = $this->group_objs;	
 	   foreach($fetch_src as $key=>$value)
 	   {
-		   $this->parse_with_obj($this->group_objs,$key,$value);
+		   $this->parse_to_obj($this->group_objs,$key,$value);
 	   }
 	   return $this->group_objs;
 	}
@@ -41,9 +41,36 @@ class parser
 	   $fetch_src = $this->agent_objs;	
 	   foreach($fetch_src as $key=>$value)
 	   {
-		   $this->parse_with_obj($this->agent_objs,$key,$value);
+		   $this->parse_to_obj($this->agent_objs,$key,$value);
 	   }
 	   return $this->agent_objs;
+	}
+	private function build_group_color_objs()
+	{
+		$this->group_column_color = $this->ini_array["queue-colors"];
+		foreach($this->group_column_color as $i=>$color_range)
+		{
+		    $range_obj = explode(",",$color_range);
+			unset($this->group_column_color[$i]);
+			foreach($range_obj as $j=>$color_range)
+			{
+				$min=-1;
+				$max=-1;
+				$color='unset';
+				
+				unset($range_obj[$j]);
+				sscanf($color_range, "[%d-%d]%s",$min, $max, $color);
+				//echo "min=$min, max=$max, color=$color\n";
+				$range_obj[$color]=array($min,$max);
+				//print_r($range_obj);
+			}
+			$this->group_column_color[$i]=$range_obj;
+		}
+		return $this->group_column_color;
+	}
+	private function build_agent_color_objs()
+	{
+		$group_column_color = $this->ini_array["agent-colors"];
 	}
 	///////////////////////////////////////////////////////////////////////////////////
 	public function get_group_init_values()
@@ -61,6 +88,10 @@ class parser
 	public function get_groups_objs()
 	{
 		return $this->build_group_objs();
+	}
+	public function get_group_collors()
+	{
+		return $this->build_group_color_objs();
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	public function get_agent_init_values()
@@ -80,4 +111,5 @@ class parser
 		return $this->build_agent_objs();
 	}
 }
+
 ?>

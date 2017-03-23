@@ -5,7 +5,7 @@ include_once './parser.php';
 class xtable
 {
 	public  $column_names;
-	private $init_values,$time_items,$array_objs; 
+	private $init_values,$time_items,$array_objs,$color_objs; 
 
 	private function _init_row_data(&$_init_rows)
 	{
@@ -122,11 +122,39 @@ class xtable
 				//skip the id column
 				for($i=0;$i<count($this->column_names)-1;$i++)
 				{
-					$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(3);
+					if($i == 0)
+					{
+						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(1);
+					}
+					else 
+					{
+						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(3);
+					}
 				}
 			}
 		}
 	}
+	public function get_item_color($_cloumn_index, $_value)
+	{
+		$ret_color = 'unset';
+		
+		$colors = $this->color_objs;
+		foreach($colors as $_index=>$color_array)
+		{
+			if($_index == $_cloumn_index)
+			{
+				foreach($color_array as $_color=>$_range_array)
+				{
+					if($_value>=$_range_array[0] && $_value <= $_range_array[1])
+					{
+						$ret_color = $_color;
+					}
+				}
+			}
+		}
+		return $ret_color;
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////
 	public function set_init_values($_values)
 	{
@@ -148,8 +176,13 @@ class xtable
 	{
 		return $this->array_objs;
 	}
+	public function set_color_objs($_color_objs)
+	{
+		$this->color_objs = $_color_objs;
+	}
 	//////////////////////////////////////////////////////////////////////////////////
 }
+/////////////////////////////////////////////////////////////////////////////
 ?>
 
 

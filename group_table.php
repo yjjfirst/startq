@@ -10,8 +10,10 @@ $group_table->set_init_values($parser->get_group_init_values());
 $group_table->set_time_items($parser->get_group_time_items());
 $group_table->set_column_names($parser->get_group_cloumn_names());
 $group_table->set_array_objs($parser->get_groups_objs());
+$group_table->set_color_objs($parser->get_group_collors());
 $group_table->set_default_values();
 $group_table->retrive_from_asterisk();
+$group_table->get_item_color(2,1);
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
 
@@ -67,8 +69,19 @@ for($i=0;$i<count($groups);next($groups),$i++)
 							$total_items[$j]+=$queue[$j];
 					}
 					$queue = $group_table->secs_to_strtime($queue);
-					foreach($queue as $item)
+					$td_class_org = $td_class;
+					foreach($queue as $_index=>$item)
 					{
+						$td_color=$group_table->get_item_color($_index,$item);
+						
+						if($td_color != 'unset')
+						{
+						    $td_class=sprintf("class=\"%s\"",$td_color);
+						}
+						else
+						{
+							$td_class = $td_class_org;
+						}
 					?>
 						<td <?php echo $td_class?>><?php echo $item?></td>
 					<?php
@@ -89,7 +102,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
 			}
 			?>
 			<tr>
-				<td <?php echo $td_class?>><?php echo "Total"?></td>
+				<td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
 				<?php
 				foreach($total_items as $item)
 				{
