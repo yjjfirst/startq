@@ -67,14 +67,6 @@ for($i=0;$i<count($agents);next($agents),$i++)
 			<?php
 			}
 			?>
-<!--
-			<tr>
-				<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
-			</tr>
-			<tr>
-				<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
-			</tr>
--->
 		</table>
 <?php
 }

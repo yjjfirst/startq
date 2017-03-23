@@ -87,9 +87,9 @@ class xtable
 			}
 		}
 	}
-	public function set_value($group,$queue,$_column,$value)
+	public function set_value($group,$queue,$_column_name,$value)
 	{
-		if(!in_array($_column,$this->column_names))
+		if(!in_array($_column_name,$this->column_names))
 		{
 			return -1;
 		}
@@ -102,7 +102,7 @@ class xtable
 			return -1;
 		}
         
-		$column_index = $this->_get_column_index($_column);
+		$column_index = $this->_get_column_index($_column_name);
 		if($column_index < 0)
 		{
 			return -1;
@@ -119,7 +119,7 @@ class xtable
 		{
 			foreach($tables as $queue=>$queues)
 			{
-				//skip the id column
+				//skip the 'Queue Id' from column_names
 				for($i=0;$i<count($this->column_names)-1;$i++)
 				{
 					if($i == 0)
@@ -182,7 +182,6 @@ class xtable
 	}
 	//////////////////////////////////////////////////////////////////////////////////
 }
-/////////////////////////////////////////////////////////////////////////////
 ?>
 
 

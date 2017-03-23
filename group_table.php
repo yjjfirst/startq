@@ -13,7 +13,6 @@ $group_table->set_array_objs($parser->get_groups_objs());
 $group_table->set_color_objs($parser->get_group_collors());
 $group_table->set_default_values();
 $group_table->retrive_from_asterisk();
-$group_table->get_item_color(2,1);
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
 
@@ -112,14 +111,6 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				}
 				?>
 			</tr>
-<!--
-			<tr>
-				<td class="yellow">Text 1A</td><td class="red">Text 1B</td><td class="green">Text 1C</td>
-			</tr>
-			<tr>
-				<td>Text 2A</td><td>Text 2B</td><td>Text 2C</td>
-			</tr>
--->
 		</table>
 <?php
 }
