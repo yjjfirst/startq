@@ -1,17 +1,17 @@
 <?php
-global $debugging_groups;
+include_once './parser.php';
 include_once './xtable.php';
-include_once './debugging_data.php';
+
 //////////////////////////////////////////////////////////////////////////////
 $parser = new parser();
-
 $group_table = new xtable();
+
 $group_table->set_init_values($parser->get_group_init_values());
 $group_table->set_time_items($parser->get_group_time_items());
 $group_table->set_column_names($parser->get_group_cloumn_names());
 $group_table->set_array_objs($parser->get_groups_objs());
-
-$group_table->set_defaults();
+$group_table->set_default_values();
+$group_table->retrive_from_asterisk();
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
 

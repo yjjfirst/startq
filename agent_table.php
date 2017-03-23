@@ -1,19 +1,18 @@
 <?php
-global $debugging_agents;
+include_once './parser.php';
 include_once './xtable.php';
-include_once './debugging_data.php';
+
 /////////////////////////////////////////////
 $parser = new parser();
-
 $agent_table = new xtable();
+
 $agent_table->set_init_values($parser->get_agent_init_values());
 $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
-
-$agent_table->set_defaults();
+$agent_table->set_default_values();
+$agent_table->retrive_from_asterisk();
 /////////////////////////////////////////////
-
 $agents=$agent_table->get_array_objs();
 for($i=0;$i<count($agents);next($agents),$i++)
 {
