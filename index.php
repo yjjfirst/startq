@@ -86,6 +86,13 @@ table.imagetable td.green{
 <?php
 //include_once("./xtable.php");
 include_once("./group_table.php");
+?>
+<table class="imagetable" width="100%">
+<tr>
+<td class="blank" width="100%"></td>
+</tr>
+</table>
+<?php
 include_once("./agent_table.php");
 ?>
 </body>

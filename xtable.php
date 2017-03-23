@@ -154,6 +154,23 @@ class xtable
 		}
 		return $ret_color;
 	}
+	public function get_agent_queue_name($row,$queue_str)
+	{
+		$queue_id = $queue_str;
+		static $agent=null;
+		
+		sscanf($queue_str, "%[^-]-%[^-]",$new_agent, $_id);
+		if($new_agent !=$agent)
+		{
+			$agent=$new_agent;
+		}
+		else
+		{
+			$queue_id = sprintf("→%d",$_id);
+		}
+	
+		return $queue_id;
+	}
 	
 	////////////////////////////////////////////////////////////////////////////////
 	public function set_init_values($_values)

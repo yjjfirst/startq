@@ -23,9 +23,6 @@ for($i=0;$i<count($agents);next($agents),$i++)
 <!-- Table goes in the document BODY -->
 		<table class="imagetable">
 			<tr>
-				<th><?php echo "Agent Name: ".$agent_name?></th>
-			</tr>
-			<tr>
 				<?php
 				foreach($agent_table->column_names as $title)
 				{
@@ -49,12 +46,13 @@ for($i=0;$i<count($agents);next($agents),$i++)
 			    {
 				    $td_class="class=\"odd\"";
 			    }
-				$agent_name=key($agent);
+				$item_name=key($agent);
+				$agent_name=$agent_table->get_agent_queue_name($rows-1,$item_name);
 			?>
 				<tr>
 				    <td <?php echo $td_class?>><?php echo $agent_name?></td>
 					<?php
-					$number=$agent["$agent_name"];
+					$number=$agent["$item_name"];
 					$number = $agent_table->secs_to_strtime($number);
 					foreach($number as $item)
 					{
