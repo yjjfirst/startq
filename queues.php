@@ -98,33 +98,34 @@ class A implements IEventListener
     }
 }
 
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+function get_options()
+{
+    $options = array(
+        'host' => '192.168.10.236',
+        'port' => 5038,
+        'username' => 'admin',
+        'secret' => '18615ae90bd71af63f90664da14b2459',
+        'connect_timeout' => 10,
+        'read_timeout' => 10,
+        'scheme' => 'tcp://' // try tls://
+    );
 
-$options = array(
-    'host' => '192.168.10.236',
-    'port' => 5038,
-    'username' => 'admin',
-    'secret' => '18615ae90bd71af63f90664da14b2459',
-    'connect_timeout' => 10,
-    'read_timeout' => 10,
-    'scheme' => 'tcp://' // try tls://
-);
+    return $options;
+}
 
 function get_queues_status($options)
 {    
-
     $a = new ClientImpl($options);
     $a->open();
-
+    
     $queues_status = ($a->send(new QueueStatusAction()));
     $events = $queues_status->getEvents();
         
     $a->close();
-    return $events;
-        
+    return $events;        
 }
 
 function get_queues_summary($options)
@@ -138,6 +139,51 @@ function get_queues_summary($options)
     $a->close();
     return $events;
 }
-    
-var_dump(get_queues_status($options));
-var_dump(get_queues_summary($options));
+
+function get_all_queues()
+{
+    $status_events = get_queues_status(get_options());
+
+    foreach($status_events as $event) {
+        if ($event->getName() == 'QueueParams') {
+            $queues[] = $event->getQueue();
+        }
+    }
+
+    return $queues;
+}
+
+function get_queue_status($name)
+{
+    $status_events = get_queues_status(get_options());
+    $summary_events = get_queues_summary(get_options());
+
+    $status['call_in_queue'] = 10;
+    $status['longest_waiting_time'] = '11100';
+    $status['agent_available'] = 5;
+    $status['inbould_calls'] = 100;
+    $status['answered_calls'] = 10;
+    $status['average_waiting_time'] = 10;
+    $status['abandoned_call'] = 100;
+    $status['transferred_vm'] = 10;
+    $status['outgoing_calls'] = 101;
+
+    return $status;
+}
+
+function get_agent_status($extension)
+{
+    $status_events = get_queues_status(get_options());
+    $summary_events = get_queues_summary(get_options());
+
+    $status['state'] = 'ringing';
+    $status['start_time'] = '11111';
+    $status['duration'] = 'asdfa';
+    $status['inbound_calls'] = 100;
+    $status['answered_calls'] = 1000;
+    $status['bounced_call'] = 99;
+    $status['transferred_call'] =88;
+    $status['average_call_duration'] = 100;
+}
+//get_all_queues();
+//get_queue_status('6000');
