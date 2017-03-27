@@ -108,17 +108,17 @@ function get_options()
         'port' => 5038,
         'username' => 'admin',
         'secret' => '18615ae90bd71af63f90664da14b2459',
-        'connect_timeout' => 10,
-        'read_timeout' => 10,
+        'connect_timeout' => 1000,
+        'read_timeout' => 1000,
         'scheme' => 'tcp://' // try tls://
     );
 
     return $options;
 }
 
-function get_queues_status($options)
+function get_all_queues_status()
 {    
-    $a = new ClientImpl($options);
+    $a = new ClientImpl(get_options());
     $a->open();
     
     $queues_status = ($a->send(new QueueStatusAction()));
@@ -128,9 +128,37 @@ function get_queues_status($options)
     return $events;        
 }
 
-function get_queues_summary($options)
+function get_all_agents()
 {
-    $a = new ClientImpl($options);
+
+    $a = new ClientImpl(get_options());
+    $a->open();
+    
+    $agents = ($a->send(new SIPPeersAction()));
+    $events = $agents->getEvents();
+
+    foreach($events as $event) {
+        if ($event->getName() == 'PeerEntry') {
+            $agent_names[] = $event->getObjectName();
+        }
+    }    
+
+    $a->close();
+    return $agent_names;        
+}
+
+function get_agent_detail()
+{
+    $a = new ClientImpl(get_options());
+    $a->open();
+    
+    $detail = ($a->send(new SIPShowPeerAction('4001')));
+    $a->close();
+}
+
+function get_all_queues_summary()
+{
+    $a = new ClientImpl(get_options());
     $a->open();
 
     $queues_status = ($a->send(new QueueSummaryAction()));
@@ -140,9 +168,11 @@ function get_queues_summary($options)
     return $events;
 }
 
-function get_all_queues()
+
+
+function get_all_queues_name()
 {
-    $status_events = get_queues_status(get_options());
+    $status_events = get_all_queues_status(get_options());
 
     foreach($status_events as $event) {
         if ($event->getName() == 'QueueParams') {
@@ -155,35 +185,72 @@ function get_all_queues()
 
 function get_queue_status($name)
 {
-    $status_events = get_queues_status(get_options());
-    $summary_events = get_queues_summary(get_options());
+    $status_events = get_all_queues_status(get_options());
+    $summary_events = get_all_queues_summary(get_options());
 
-    $status['call_in_queue'] = 10;
-    $status['longest_waiting_time'] = '11100';
-    $status['agent_available'] = 5;
-    $status['inbould_calls'] = 100;
-    $status['answered_calls'] = 10;
-    $status['average_waiting_time'] = 10;
-    $status['abandoned_call'] = 100;
+    foreach ($status_events as $queue_params) {
+        if ($queue_params->getQueue() == $name) break;
+    }
+
+    foreach($summary_events as $queue_summary) {
+        if ($queue_summary->getQueue() == $name) break;
+    }
+
+    $status['call_in_queue'] = $queue_params->getCalls();
+    $status['longest_waiting_time'] = 0;
+    $status['agent_available'] = $queue_summary->getAvailable();
+    $status['inbould_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
+    $status['answered_calls'] = $queue_params->getCompleted();
+    $status['average_waiting_time'] = $queue_params->getHoldtime();
+    $status['abandoned_call'] = $queue_params->getAbandoned();
     $status['transferred_vm'] = 10;
     $status['outgoing_calls'] = 101;
 
     return $status;
 }
 
+function if_agent_login($extension)
+{
+    $status_events = get_all_queues_status(get_options());
+
+    foreach($status_events as $event) {
+        if ($event->getName() != 'QueueMember') continue;
+        if ($event->getMemberName() == $extension)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 function get_agent_status($extension)
 {
-    $status_events = get_queues_status(get_options());
-    $summary_events = get_queues_summary(get_options());
+    $status_events = get_all_queues_status(get_options());
+    $summary_events = get_all_queues_summary(get_options());
 
-    $status['state'] = 'ringing';
+    foreach($status_events as $event) {
+        if ($event->getName() != 'QueueMember') continue;
+        if ($event->getMemberName() == $extension) {
+            break; 
+        }
+    }
+
+    if (!if_agent_login($extension)) {
+        $status['state'] = 'Not login';
+    }else {
+        
+    }
     $status['start_time'] = '11111';
     $status['duration'] = 'asdfa';
     $status['inbound_calls'] = 100;
-    $status['answered_calls'] = 1000;
+    $status['answered_calls'] = $event->getCallsTaken();
     $status['bounced_call'] = 99;
     $status['transferred_call'] =88;
     $status['average_call_duration'] = 100;
 }
-//get_all_queues();
-//get_queue_status('6000');
+
+get_all_queues_name();
+get_queue_status('6000');
+get_all_agents();
+get_agent_detail();
+get_agent_status('4001');
+if_agent_login('4002');
