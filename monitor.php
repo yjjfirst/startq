@@ -91,11 +91,85 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
+define(RINGING, 8);
 class Monitor implements IEventListener
 {
+    private $agents = array();
+
+    function Monitor()
+    {
+        $agents = get_all_agents();
+        foreach($agents as $agent) {
+            $this->agents[$agent]['state'] = 0;
+            $this->agents[$agent]['in'] = 0;
+            $this->agents[$agent]['out'] = 0;
+            $this->agents[$agent]['start'] = 0;
+            $this->agents[$agent]['uptime'] = 0;
+            $this->agents[$agent]['calls'] = 0;
+        }
+    }
+
+    public function dump_agents()
+    {
+        if (!isset($this->agents)) return;
+            
+        echo "\n";
+        foreach($this->agents as $agent => $status) {
+            echo "$agent :";
+            foreach($status as $items => $s) {
+                echo "$items -> $s ";
+            }
+            echo "\n";
+        }
+
+        echo "\n";
+    }
+
+
+    /* extension state:
+     * 1 - calling
+     * 8 - ringing
+     * 16 -hold
+     */
     public function handle(EventMessage $event)
     {
-        var_dump($event);
+        $name = $event->getName();
+        
+        if ($name == 'Newstate') {
+            $channel = $event->getChannel();
+            $ext = explode('-', explode('/', $channel)[1])[0];
+            if ($event->getChannelState() == 6) { //connected
+                $this->agents[$ext]['uptime'] = time();
+                $this->agents[$ext]['calls'] ++;
+            }
+            
+        } else if ($name == 'ExtensionStatus') {
+            $ext = $event->getExtension();
+            
+            if ($event->getStatus() == 1 && $this->agents[$ext]['state'] == 0) { //outgoing call
+                $this->agents[$ext]['out'] ++;
+            }
+
+            if ($this->agents[$ext]['state'] != $event->getStatus()) {
+                $this->agents[$ext]['start'] = time();
+                $this->agents[$ext]['state'] = $event->getStatus();
+            }
+
+            if ($event->getStatus() == 8) //ringing
+                $this->agents[$ext]['in'] ++;
+            
+                
+        } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
+            echo $event->getApplicationData();
+            return;
+        }
+        else {
+            //echo $name;
+            //echo "\n";
+            return;
+        }        
+
+        $this->dump_agents();
     }
 }
 
@@ -104,17 +178,16 @@ ini_set('display_errors', 1);
 
 try
 {
-    $monitor = new ClientImpl(get_options());
-    $monitor->registerEventListener(new Monitor());
-    $monitor->open();
+	$monitor = new ClientImpl(get_options());
+	$monitor->registerEventListener(new Monitor());
+	$monitor->open();
 
-    $time = time();
-    while(true)
-    {
-        usleep(1000); // 1ms delay
-        $monitor->process();
-    }
-    $monitor->close(); 
+	$time = time();
+	while(true){
+        usleep(1000);
+	    $monitor->process();
+	}
+	$monitor->close(); 
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+	echo $e->getMessage() . "\n";
 }
