@@ -67,7 +67,7 @@ class parser
 	}
 	public function get_group_cloumn_names()
 	{
-		return array("Queue Id","Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
+		return array("Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
 	}
 	public function get_groups_objs()
 	{

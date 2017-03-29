@@ -1,4 +1,4 @@
-<?php
+ <?php
 include_once './parser.php';
 include_once './xtable.php';
 
@@ -15,20 +15,11 @@ $group_table->set_default_values();
 $group_table->retrive_from_asterisk();
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
-
-for($i=0;$i<count($groups);next($groups),$i++)
-{
-	//print_r($groups
-	$group_name = key($groups);
-	$total_items=array();
-	$queues = current($groups);
 ?>
 <!-- Table goes in the document BODY -->
 		<table class="imagetable">
 			<tr>
-				<th><?php echo "Group Name: ".$group_name?></th>
-			</tr>
-			<tr>
+			    <th><?php echo ''?></th>
 				<?php
 				foreach($group_table->column_names as $title)
 				{
@@ -39,12 +30,70 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				?>
 			</tr>
 			<?php
-			$rows = 0;
-			$td_class = "class=\"odd\"";
-			for($k=0;$k<count($queues);$k++,next($queues))
+			for($i=0;$i<count($groups);next($groups),$i++)
 			{
+				//print_r($groups
+				$group_name = key($groups);
+				$total_items=array();
+				$queues = current($groups);
+				$rows = 0;
+				$td_class = "class=\"odd\"";
+			?>
+			<tr>
+			<td><?php echo $group_name?></td>
+			</tr>
+			<?php
+				
+				for($k=0;$k<count($queues);$k++,next($queues))
+				{
+					$rows++;
+					$queue_name=key($queues);
+					if($rows%2 == 0)
+					{	 
+						$td_class="class=\"even\"";
+					}
+					else
+					{
+						$td_class="class=\"odd\"";
+					}
+				?>
+					<tr>
+						<td <?php echo $td_class?>><?php echo $queue_name?></td>
+						<?php
+						$queue=$queues["$queue_name"];
+						for($j=0;$j<count($queue);$j++)
+						{
+							if($j>=count($total_items))
+							{
+								array_push($total_items,$queue[$j]);  
+							}
+							else
+								$total_items[$j]+=$queue[$j];
+						}
+						$queue = $group_table->secs_to_strtime($queue);
+						$td_class_org = $td_class;
+						foreach($queue as $_index=>$item)
+						{
+							$td_color=$group_table->get_item_color($_index,$item);
+							
+							if($td_color != 'unset')
+							{
+								$td_class=sprintf("class=\"%s\"",$td_color);
+							}
+							else
+							{
+								$td_class = $td_class_org;
+							}
+						?>
+							<td <?php echo $td_class?>><?php echo $item?></td>
+						<?php
+						}
+						?>
+					</tr>
+				<?php
+				}
+				$total_items = $group_table->secs_to_strtime($total_items);
 				$rows++;
-				$queue_name=key($queues);
 				if($rows%2 == 0)
 				{	 
 					$td_class="class=\"even\"";
@@ -53,54 +102,8 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				{
 					$td_class="class=\"odd\"";
 				}
-			?>
+				?>
 				<tr>
-				    <td <?php echo $td_class?>><?php echo $queue_name?></td>
-					<?php
-					$queue=$queues["$queue_name"];
-					for($j=0;$j<count($queue);$j++)
-					{
-						if($j>=count($total_items))
-						{
-							array_push($total_items,$queue[$j]);  
-						}
-						else
-							$total_items[$j]+=$queue[$j];
-					}
-					$queue = $group_table->secs_to_strtime($queue);
-					$td_class_org = $td_class;
-					foreach($queue as $_index=>$item)
-					{
-						$td_color=$group_table->get_item_color($_index,$item);
-						
-						if($td_color != 'unset')
-						{
-						    $td_class=sprintf("class=\"%s\"",$td_color);
-						}
-						else
-						{
-							$td_class = $td_class_org;
-						}
-					?>
-						<td <?php echo $td_class?>><?php echo $item?></td>
-					<?php
-					}
-					?>
-				</tr>
-			<?php
-			}
-			$total_items = $group_table->secs_to_strtime($total_items);
-			$rows++;
-			if($rows%2 == 0)
-			{	 
-				$td_class="class=\"even\"";
-			}
-			else
-			{
-				$td_class="class=\"odd\"";
-			}
-			?>
-			<tr>
 				<td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
 				<?php
 				foreach($total_items as $item)
@@ -110,8 +113,8 @@ for($i=0;$i<count($groups);next($groups),$i++)
 				<?php
 				}
 				?>
-			</tr>
+				</tr>
+			<?php
+			}
+			?>
 		</table>
-<?php
-}
-?>

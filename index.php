@@ -73,18 +73,41 @@ table.imagetable td.green{
 	border-color: #999999;
 }
 </style>
+<script language="JavaScript"> 
+function page_reload() 
+{ 
+/*
+     var httpxml;
+	 if (window.XMLHttpRequest) 
+	 {
+        xmlhttp = new XMLHttpRequest();
+     }
+	 else
+	 {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+     }
+     xmlhttp.onreadystatechange = function()
+	 {
+         if(4 == xmlhttp.readyState && 200 == xmlhttp.status) 
+		 {
+              document.getElementById("ajax_result").innerHTML = xmlhttp.responseText;
+         }
+	 }
+	 xmlhttp.open("GET","index.php");
+     xmlhttp.send();
+*/
+    window.location.reload(); 
+} 
+setTimeout('page_reload()',3000); 
+</script> 
 <body>
 <table class="imagetable" width="100%">
-<tr>
-<th class="top"  align="left">Call Centre Queues and Agents</th>
-</tr>
 <tr>
 <td class="blank" width="100%"></td>
 </tr>
 </table>
 
 <?php
-//include_once("./xtable.php");
 include_once("./group_table.php");
 ?>
 <table class="imagetable" width="100%">
