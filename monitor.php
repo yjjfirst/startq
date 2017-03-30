@@ -91,7 +91,6 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
-define(RINGING, 8);
 class Monitor implements IEventListener
 {
     private $agents = array();
@@ -125,7 +124,6 @@ class Monitor implements IEventListener
         echo "\n";
     }
 
-
     /* extension state:
      * 1 - calling
      * 8 - ringing
@@ -157,15 +155,10 @@ class Monitor implements IEventListener
 
             if ($event->getStatus() == 8) //ringing
                 $this->agents[$ext]['in'] ++;
-            
-                
         } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
-            echo $event->getApplicationData();
-            return;
-        }
-        else {
-            //echo $name;
-            //echo "\n";
+        } else {
+            echo $name;
+            echo "\n";
             return;
         }        
 

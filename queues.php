@@ -128,19 +128,39 @@ function get_all_queues_status()
     return $events;        
 }
 
+function is_agent($ext, $a)
+{
+    $ext_detail = $a->send(new SIPShowPeerAction($ext));
+    $raw = $ext_detail->getRawContent();
+    $raw_array = explode("\n", $raw);
+    
+    foreach($raw_array as $item) {
+        $pair = explode(":", $item);
+        if (trim($pair[0]) == 'Context' && trim($pair[1]) == 'from-internal') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function get_all_agents()
 {
 
     $a = new ClientImpl(get_options());
     $a->open();
     
-    $agents = ($a->send(new SIPPeersAction()));
+    $agents = $a->send(new SIPPeersAction());
     $events = $agents->getEvents();
-
+    $agent_names = array();
+    
     foreach($events as $event) {
-        if ($event->getName() == 'PeerEntry') {
-            $agent_names[] = $event->getObjectName();
-        }
+        if ($event->getName() != 'PeerEntry') continue;       
+
+        $ext = $event->getObjectName();
+        
+        if (is_agent($ext, $a))
+            $agent_names[] = $ext;
     }    
 
     $a->close();
@@ -197,14 +217,13 @@ function get_queue_status($name)
     }
 
     $status['call_in_queue'] = $queue_params->getCalls();
-    $status['longest_waiting_time'] = 0;
+    $status['longest_waiting_time'] = $queue_summary->getLongestHoldTime();
     $status['agent_available'] = $queue_summary->getAvailable();
     $status['inbould_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
     $status['answered_calls'] = $queue_params->getCompleted();
     $status['average_waiting_time'] = $queue_params->getHoldtime();
     $status['abandoned_call'] = $queue_params->getAbandoned();
     $status['transferred_vm'] = 10;
-    $status['outgoing_calls'] = 101;
 
     return $status;
 }
@@ -225,11 +244,12 @@ function if_agent_login($extension)
 function get_agent_status($extension)
 {
     $status_events = get_all_queues_status(get_options());
-    $summary_events = get_all_queues_summary(get_options());
-
+    $found = FALSE;
+    
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
         if ($event->getMemberName() == $extension) {
+            $found = TRUE;
             break; 
         }
     }
@@ -239,15 +259,18 @@ function get_agent_status($extension)
     }else {
         
     }
-    $status['start_time'] = '11111';
-    $status['duration'] = 'asdfa';
-    $status['inbound_calls'] = 100;
-    $status['answered_calls'] = $event->getCallsTaken();
-    $status['bounced_call'] = 99;
-    $status['transferred_call'] =88;
-    $status['average_call_duration'] = 100;
-}
 
+    if ($found) {
+        $status['start_time'] = '11111';
+        $status['duration'] = 'asdfa';
+        $status['inbound_calls'] = 100;
+        $status['answered_calls'] = $event->getCallsTaken();
+        $status['bounced_call'] = 99;
+        $status['transferred_call'] =88;
+        $status['average_call_duration'] = 100;
+
+    }
+}
 get_all_queues_name();
 get_queue_status('6000');
 get_all_agents();
