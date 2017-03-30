@@ -91,6 +91,12 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
+define("EXT_STATUS_RING", 8);
+define("EXT_STATUS_IDLE", 0);
+define("EXT_STATUS_CALLING", 1);
+define("EXT_HOLD", 16);
+define("CHANNEL_CONNECTED", 6);
+
 class Monitor implements IEventListener
 {
     private $agents = array();
@@ -108,27 +114,27 @@ class Monitor implements IEventListener
         }
     }
 
-    public function dump_agents()
+    public function dump_agents($fd)
     {
         if (!isset($this->agents)) return;
             
-        echo "\n";
+        fwrite($fd, "\n");
         foreach($this->agents as $agent => $status) {
-            echo "$agent :";
+            fwrite($fd, "$agent:");
             foreach($status as $items => $s) {
-                echo "$items -> $s ";
+                fwrite ($fd, "$items=>$s ");
             }
-            echo "\n";
+            fwrite($fd, "\n");
         }
-
-        echo "\n";
+        fwrite($fd, "\n");
     }
 
-    /* extension state:
-     * 1 - calling
-     * 8 - ringing
-     * 16 -hold
-     */
+    public function save_status()
+    {
+        $fd = fopen("ext.tmp", "w") or die("Failed to create file:");
+        $this->dump_agents($fd);        
+    }
+
     public function handle(EventMessage $event)
     {
         $name = $event->getName();
@@ -136,7 +142,7 @@ class Monitor implements IEventListener
         if ($name == 'Newstate') {
             $channel = $event->getChannel();
             $ext = explode('-', explode('/', $channel)[1])[0];
-            if ($event->getChannelState() == 6) { //connected
+            if ($event->getChannelState() == CHANNEL_CONNECTED) { 
                 $this->agents[$ext]['uptime'] = time();
                 $this->agents[$ext]['calls'] ++;
             }
@@ -144,7 +150,8 @@ class Monitor implements IEventListener
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
             
-            if ($event->getStatus() == 1 && $this->agents[$ext]['state'] == 0) { //outgoing call
+            if ($event->getStatus() == EXT_STATUS_CALLING
+            && $this->agents[$ext]['state'] == EXT_STATUS_IDLE) { 
                 $this->agents[$ext]['out'] ++;
             }
 
@@ -153,16 +160,16 @@ class Monitor implements IEventListener
                 $this->agents[$ext]['state'] = $event->getStatus();
             }
 
-            if ($event->getStatus() == 8) //ringing
+            if ($event->getStatus() == EXT_STATUS_RING) //ringing
                 $this->agents[$ext]['in'] ++;
         } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
         } else {
-            echo $name;
-            echo "\n";
+            //echo $name;
+            //echo "\n";
             return;
         }        
-
-        $this->dump_agents();
+        $this->dump_agents(STDIN);
+        $this->save_status();
     }
 }
 

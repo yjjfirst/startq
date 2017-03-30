@@ -90,6 +90,13 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
+
+define ("AGENT_NOT_LOGIN", 0);
+define ("AGENT_HOLD", 1);
+define ("AGENT_AVAILABLE", 2);
+define ("AGENT_BUSY", 3);
+define ("AGENT_PAUSED", 4);
+
 class A implements IEventListener
 {
     public function handle(EventMessage $event)
@@ -157,8 +164,7 @@ function get_all_agents()
     foreach($events as $event) {
         if ($event->getName() != 'PeerEntry') continue;       
 
-        $ext = $event->getObjectName();
-        
+        $ext = $event->getObjectName();        
         if (is_agent($ext, $a))
             $agent_names[] = $ext;
     }    
@@ -187,8 +193,6 @@ function get_all_queues_summary()
     $a->close();
     return $events;
 }
-
-
 
 function get_all_queues_name()
 {
