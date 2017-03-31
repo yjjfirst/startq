@@ -234,14 +234,12 @@ function get_agent_status_from_queues($extension, $status)
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
         if ($event->getMemberName() == $extension) {
+            $status[AGENT_ANSWERED_CALLS_KEY] += $event->getCallsTaken();
             $found = TRUE;
-            break; 
         }
     }
 
-    if ($found) {
-        $status[AGENT_ANSWERED_CALLS_KEY] = $event->getCallsTaken();
-    } else { 
+    if (!$found) { 
         $status[AGENT_ANSWERED_CALLS_KEY] = 0;
     }
     return $status;
