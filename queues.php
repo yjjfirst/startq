@@ -99,11 +99,13 @@ define ("AGENT_NOT_LOGIN", 5);
 
 define ("AGENT_STATE_KEY", 'state');
 define ("AGENT_STARTTIME_KEY", 'starttime');
+define ("AGENT_STATE_DURATION_KEY", 'duration');
 define ("AGENT_IN_KEY", 'in');
 define ("AGENT_OUT_KEY", 'out');
 define ("AGENT_UPTIME_KEY", 'uptime');
 define ("AGENT_UPCALLS_KEY", 'upcalls');
 define ("AGENT_ANSWERED_CALLS_KEY", 'answered_calls');
+define ("AGENT_BOUNCED_CALLS_KEY", 'bounced_calls');
 
 class A implements IEventListener
 {
@@ -230,7 +232,6 @@ function get_agent_status_from_queues($extension, $status)
     $status_events = get_all_queues_status(get_options());
     $found = FALSE;
 
-    //TODO: take are of agent belong to multi queue.
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
         if ($event->getMemberName() == $extension) {
@@ -282,7 +283,9 @@ function get_agent_status($agent)
     $status = get_agent_status_from_monitor($agent);
     $status = get_agent_status_from_queues($agent, $status);
 
+    if ($status[AGENT_STARTTIME_KEY] != 0)
+        $status[AGENT_STATE_DURATION_KEY] = time() - $status[AGENT_STARTTIME_KEY];
+
+    $status[AGENT_BOUNCED_CALLS_KEY] = $status[AGENT_IN_KEY] -$status[AGENT_ANSWERED_CALLS_KEY];
     return $status;
 }
-
-var_dump(get_agent_status('4001'));

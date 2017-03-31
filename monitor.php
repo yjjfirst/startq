@@ -109,7 +109,7 @@ class Monitor implements IEventListener
         $agents = get_all_agents();
         foreach($agents as $agent) {
             $this->agents[$agent]['state'] = 0;
-            $this->agents[$agent]['starttime'] = 0;
+            $this->agents[$agent]['starttime'] = time();
             $this->agents[$agent]['in'] = 0;
             $this->agents[$agent]['out'] = 0;
             $this->agents[$agent]['uptime'] = 0;
@@ -159,8 +159,10 @@ class Monitor implements IEventListener
         $name = $event->getName();
         $ext = $this->get_event_ext($event);
 
-        if (!$this->if_agent_login_queue($ext)) return;
-        
+        if (!$this->if_agent_login_queue($ext)) {
+            return;
+        }
+
         if ($name == 'Newstate') {
             if ($event->getChannelState() == EXT_CHANNEL_CONNECTED) { 
                 $this->agents[$ext][AGENT_UPTIME_KEY] = time();
@@ -186,7 +188,6 @@ class Monitor implements IEventListener
             //echo "\n";
             return;
         }        
-
         $this->dump_agents(STDIN);
         $this->save_status();
     }
