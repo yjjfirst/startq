@@ -1,4 +1,5 @@
 <?php
+require_once('options.php');
 require(implode(DIRECTORY_SEPARATOR, array(
     __DIR__,
     'vendor',
@@ -90,12 +91,19 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
-
-define ("AGENT_NOT_LOGIN", 0);
 define ("AGENT_HOLD", 1);
 define ("AGENT_AVAILABLE", 2);
 define ("AGENT_BUSY", 3);
 define ("AGENT_PAUSED", 4);
+define ("AGENT_NOT_LOGIN", 5);
+
+define ("AGENT_STATE_KEY", 'state');
+define ("AGENT_STARTTIME_KEY", 'starttime');
+define ("AGENT_IN_KEY", 'in');
+define ("AGENT_OUT_KEY", 'out');
+define ("AGENT_UPTIME_KEY", 'uptime');
+define ("AGENT_UPCALLS_KEY", 'upcalls');
+define ("AGENT_ANSWERED_CALLS_KEY", 'answered_calls');
 
 class A implements IEventListener
 {
@@ -107,21 +115,6 @@ class A implements IEventListener
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
-function get_options()
-{
-    $options = array(
-        'host' => '192.168.10.236',
-        'port' => 5038,
-        'username' => 'admin',
-        'secret' => '18615ae90bd71af63f90664da14b2459',
-        'connect_timeout' => 1000,
-        'read_timeout' => 1000,
-        'scheme' => 'tcp://' // try tls://
-    );
-
-    return $options;
-}
 
 function get_all_queues_status()
 {    
@@ -232,24 +225,12 @@ function get_queue_status($name)
     return $status;
 }
 
-function if_agent_login($extension)
-{
-    $status_events = get_all_queues_status(get_options());
-
-    foreach($status_events as $event) {
-        if ($event->getName() != 'QueueMember') continue;
-        if ($event->getMemberName() == $extension)
-            return TRUE;
-    }
-
-    return FALSE;
-}
-
-function get_agent_status($extension)
+function get_agent_status_from_queues($extension, $status)
 {
     $status_events = get_all_queues_status(get_options());
     $found = FALSE;
-    
+
+    //TODO: take are of agent belong to multi queue.
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
         if ($event->getMemberName() == $extension) {
@@ -258,26 +239,52 @@ function get_agent_status($extension)
         }
     }
 
-    if (!if_agent_login($extension)) {
-        $status['state'] = 'Not login';
-    }else {
-        
-    }
-
     if ($found) {
-        $status['start_time'] = '11111';
-        $status['duration'] = 'asdfa';
-        $status['inbound_calls'] = 100;
-        $status['answered_calls'] = $event->getCallsTaken();
-        $status['bounced_call'] = 99;
-        $status['transferred_call'] =88;
-        $status['average_call_duration'] = 100;
-
+        $status[AGENT_ANSWERED_CALLS_KEY] = $event->getCallsTaken();
+    } else { 
+        $status[AGENT_ANSWERED_CALLS_KEY] = 0;
     }
+    return $status;
 }
-get_all_queues_name();
-get_queue_status('6000');
-get_all_agents();
-get_agent_detail();
-get_agent_status('4001');
-if_agent_login('4002');
+
+function get_agent_status_string($exten)
+{
+   $contents = file_get_contents("ext.tmp");
+   $contents_array = explode("\n", $contents);
+
+   foreach($contents_array as $content) {
+       $content_array = explode(':', $content);
+       if ($content_array[0] == $exten)
+           return $content_array[1];
+   }
+}
+
+function parse_agent_status($status)
+{
+    $status_array = explode(' ', $status);
+
+    foreach ($status_array as $s) {
+        $items = explode("=>", $s);
+        if ($items[0] != NULL)
+            $result[$items[0]] = $items[1];
+    }
+
+    return $result;
+}
+
+function get_agent_status_from_monitor($agent)
+{
+    $string = get_agent_status_string($agent);
+    $status = parse_agent_status($string);
+    return $status;
+}
+
+function get_agent_status($agent)
+{
+    $status = get_agent_status_from_monitor($agent);
+    $status = get_agent_status_from_queues($agent, $status);
+
+    return $status;
+}
+
+var_dump(get_agent_status('4001'));

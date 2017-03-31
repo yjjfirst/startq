@@ -1,4 +1,5 @@
 <?php
+require_once('options.php');
 require_once('queues.php');
 require(implode(DIRECTORY_SEPARATOR, array(
     __DIR__,
@@ -95,7 +96,9 @@ define("EXT_STATUS_RING", 8);
 define("EXT_STATUS_IDLE", 0);
 define("EXT_STATUS_CALLING", 1);
 define("EXT_HOLD", 16);
-define("CHANNEL_CONNECTED", 6);
+define("EXT_CHANNEL_CONNECTED", 6);
+
+define("EXT_NOT_LOGIN", 7);
 
 class Monitor implements IEventListener
 {
@@ -106,19 +109,21 @@ class Monitor implements IEventListener
         $agents = get_all_agents();
         foreach($agents as $agent) {
             $this->agents[$agent]['state'] = 0;
+            $this->agents[$agent]['starttime'] = 0;
             $this->agents[$agent]['in'] = 0;
             $this->agents[$agent]['out'] = 0;
-            $this->agents[$agent]['start'] = 0;
             $this->agents[$agent]['uptime'] = 0;
-            $this->agents[$agent]['calls'] = 0;
+            $this->agents[$agent]['upcalls'] = 0;
+            if (!$this->if_agent_login_queue($agent))
+                $this->agents[$agent]['state'] = EXT_NOT_LOGIN;
+
         }
     }
 
     public function dump_agents($fd)
     {
         if (!isset($this->agents)) return;
-            
-        fwrite($fd, "\n");
+        
         foreach($this->agents as $agent => $status) {
             fwrite($fd, "$agent:");
             foreach($status as $items => $s) {
@@ -126,7 +131,6 @@ class Monitor implements IEventListener
             }
             fwrite($fd, "\n");
         }
-        fwrite($fd, "\n");
     }
 
     public function save_status()
@@ -135,41 +139,68 @@ class Monitor implements IEventListener
         $this->dump_agents($fd);        
     }
 
-    public function handle(EventMessage $event)
+    public function get_event_ext($event)
     {
         $name = $event->getName();
+        $ext = '';
         
         if ($name == 'Newstate') {
             $channel = $event->getChannel();
             $ext = explode('-', explode('/', $channel)[1])[0];
-            if ($event->getChannelState() == CHANNEL_CONNECTED) { 
-                $this->agents[$ext]['uptime'] = time();
-                $this->agents[$ext]['calls'] ++;
+        } else if ($name == 'ExtensionStatus') {
+            $ext = $event->getExtension();
+        }
+
+        return $ext;
+    }
+    
+    public function handle(EventMessage $event)
+    {
+        $name = $event->getName();
+        $ext = $this->get_event_ext($event);
+
+        if (!$this->if_agent_login_queue($ext)) return;
+        
+        if ($name == 'Newstate') {
+            if ($event->getChannelState() == EXT_CHANNEL_CONNECTED) { 
+                $this->agents[$ext][AGENT_UPTIME_KEY] = time();
+                $this->agents[$ext][AGENT_UPCALLS_KEY] ++;
             }
             
         } else if ($name == 'ExtensionStatus') {
-            $ext = $event->getExtension();
-            
             if ($event->getStatus() == EXT_STATUS_CALLING
-            && $this->agents[$ext]['state'] == EXT_STATUS_IDLE) { 
-                $this->agents[$ext]['out'] ++;
+            && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
+                $this->agents[$ext][AGENT_OUT_KEY] ++;
             }
 
-            if ($this->agents[$ext]['state'] != $event->getStatus()) {
-                $this->agents[$ext]['start'] = time();
-                $this->agents[$ext]['state'] = $event->getStatus();
+            if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
+                $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
+                $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
             }
 
             if ($event->getStatus() == EXT_STATUS_RING) //ringing
-                $this->agents[$ext]['in'] ++;
+                $this->agents[$ext][AGENT_IN_KEY] ++;
         } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
         } else {
             //echo $name;
             //echo "\n";
             return;
         }        
+
         $this->dump_agents(STDIN);
         $this->save_status();
+    }
+
+    function if_agent_login_queue($extension)
+    {
+        $status_events = get_all_queues_status(get_options());
+        
+        foreach($status_events as $event) {
+            if ($event->getName() != 'QueueMember') continue;
+            if ($event->getMemberName() == $extension)
+                return TRUE;
+        }        
+        return FALSE;
     }
 }
 
