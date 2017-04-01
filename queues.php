@@ -106,6 +106,7 @@ define ("AGENT_UPTIME_KEY", 'uptime');
 define ("AGENT_UPCALLS_KEY", 'upcalls');
 define ("AGENT_ANSWERED_CALLS_KEY", 'answered_calls');
 define ("AGENT_BOUNCED_CALLS_KEY", 'bounced_calls');
+define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
 
 class A implements IEventListener
 {

@@ -114,6 +114,7 @@ class Monitor implements IEventListener
             $this->agents[$agent]['out'] = 0;
             $this->agents[$agent]['uptime'] = 0;
             $this->agents[$agent]['upcalls'] = 0;
+            $this->agents[$agent][AGENT_TRANSFERED_CALLS_KEY] = 0;
             if (!$this->if_agent_login_queue($agent))
                 $this->agents[$agent]['state'] = EXT_NOT_LOGIN;
 
@@ -153,13 +154,38 @@ class Monitor implements IEventListener
 
         return $ext;
     }
+
+    private function get_ext_from_channel($channel)
+    {
+        if (Empty(trim($channel))) return NULL;
+
+        var_dump($channel);
+        $ext = explode('-', explode('/', $channel)[1])[0];
+
+        return $ext;
+    }
     
+    public function count_transfered_call($event)
+    {
+        $data_array = explode(',', $event->getApplicationData());
+
+        $blind_transfer = explode(':', $data_array[0]);
+        $ext = $this->get_ext_from_channel($blind_transfer[1]);
+
+        if ($ext) {
+            $this->agents[$ext][AGENT_TRANSFERED_CALLS_KEY] ++;
+        }
+        
+        $attended_transfer = explode(':', $data_array[1]);
+        $user = explode(':', $data_array[2]);
+    }
+
     public function handle(EventMessage $event)
     {
         $name = $event->getName();
         $ext = $this->get_event_ext($event);
 
-        if (!$this->if_agent_login_queue($ext)) {
+        if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
 
@@ -183,9 +209,8 @@ class Monitor implements IEventListener
             if ($event->getStatus() == EXT_STATUS_RING) //ringing
                 $this->agents[$ext][AGENT_IN_KEY] ++;
         } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
+            $this->count_transfered_call($event);
         } else {
-            //echo $name;
-            //echo "\n";
             return;
         }        
         $this->dump_agents(STDIN);
