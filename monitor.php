@@ -175,9 +175,12 @@ class Monitor implements IEventListener
         if ($ext) {
             $this->agents[$ext][AGENT_TRANSFERED_CALLS_KEY] ++;
         }
-        
-        $attended_transfer = explode(':', $data_array[1]);
+
         $user = explode(':', $data_array[2]);
+        if (strstr($event->getChannel(), 'xfer')) {
+            $this->agents[trim($user[1])][AGENT_TRANSFERED_CALLS_KEY] ++;
+        }
+        
     }
 
     public function handle(EventMessage $event)
