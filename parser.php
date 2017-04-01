@@ -3,10 +3,27 @@ class parser
 {	
 	private $ini_array,$group_objs,$agent_objs,$group_column_color;
 	
-	public function __construct($conf_path='queues.conf')
+        private static $_instance=null;
+
+	private function __construct()
 	{
-		$this->ini_array = parse_ini_file($conf_path, true);
+
 	}
+        private function __clone()
+        {
+        }
+        
+        public function get_instance($conf_path='queues.conf')
+        {
+              if(is_null(self::$_instance))
+              {
+                  self::$_instance = new parser();
+                  self::$_instance->ini_array = parse_ini_file($conf_path, true);
+              }
+
+              return self::$_instance;
+        }
+       
 	///////////////////////////////////////////////////////////////////////////////////	
 	private function parse_to_groupobj(&$data_source, $name, $row_names_str)
 	{

@@ -1,6 +1,5 @@
 <?php
 include_once './debugging_data.php';
-include_once './parser.php';
 
 class xtable
 {

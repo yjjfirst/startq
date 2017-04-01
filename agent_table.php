@@ -3,7 +3,7 @@ include_once './parser.php';
 include_once './xtable.php';
 
 /////////////////////////////////////////////
-$parser = new parser();
+$parser = parser::get_instance();
 $agent_table = new xtable();
 
 $agent_table->set_init_values($parser->get_agent_init_values());
