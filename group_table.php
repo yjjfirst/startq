@@ -3,7 +3,7 @@ include_once './parser.php';
 include_once './xtable.php';
 
 //////////////////////////////////////////////////////////////////////////////
-$parser = new parser();
+$parser = parser::get_instance();
 $group_table = new xtable();
 
 $group_table->set_init_values($parser->get_group_init_values());
