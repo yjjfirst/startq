@@ -107,6 +107,7 @@ define ("AGENT_UPCALLS_KEY", 'upcalls');
 define ("AGENT_ANSWERED_CALLS_KEY", 'answered_calls');
 define ("AGENT_BOUNCED_CALLS_KEY", 'bounced_calls');
 define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
+define ("AGENT_AVERAGE_TALK_TIME_KEY", 'average');
 
 class A implements IEventListener
 {
@@ -167,15 +168,6 @@ function get_all_agents()
 
     $a->close();
     return $agent_names;        
-}
-
-function get_agent_detail()
-{
-    $a = new ClientImpl(get_options());
-    $a->open();
-    
-    $detail = ($a->send(new SIPShowPeerAction('4001')));
-    $a->close();
 }
 
 function get_all_queues_summary()

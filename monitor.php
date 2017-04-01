@@ -97,7 +97,6 @@ define("EXT_STATUS_IDLE", 0);
 define("EXT_STATUS_CALLING", 1);
 define("EXT_HOLD", 16);
 define("EXT_CHANNEL_CONNECTED", 6);
-
 define("EXT_NOT_LOGIN", 7);
 
 class Monitor implements IEventListener
@@ -108,16 +107,16 @@ class Monitor implements IEventListener
     {
         $agents = get_all_agents();
         foreach($agents as $agent) {
-            $this->agents[$agent]['state'] = 0;
-            $this->agents[$agent]['starttime'] = time();
-            $this->agents[$agent]['in'] = 0;
-            $this->agents[$agent]['out'] = 0;
-            $this->agents[$agent]['uptime'] = 0;
-            $this->agents[$agent]['upcalls'] = 0;
+            $this->agents[$agent][AGENT_STATE_KEY] = 0;
+            $this->agents[$agent][AGENT_STARTTIME_KEY] = time();
+            $this->agents[$agent][AGENT_IN_KEY] = 0;
+            $this->agents[$agent][AGENT_OUT_KEY] = 0;
+            $this->agents[$agent][AGENT_UPTIME_KEY] = 0;
+            $this->agents[$agent][AGENT_UPCALLS_KEY] = 0;
             $this->agents[$agent][AGENT_TRANSFERED_CALLS_KEY] = 0;
             if (!$this->if_agent_login_queue($agent))
-                $this->agents[$agent]['state'] = EXT_NOT_LOGIN;
-
+                $this->agents[$agent][AGENT_STATE_KEY] = EXT_NOT_LOGIN;
+            $this->agents[$agent][AGENT_AVERAGE_TALK_TIME_KEY] = 0;
         }
     }
 
@@ -199,17 +198,28 @@ class Monitor implements IEventListener
             }
             
         } else if ($name == 'ExtensionStatus') {
+
+            //count out calls.
             if ($event->getStatus() == EXT_STATUS_CALLING
             && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
                 $this->agents[$ext][AGENT_OUT_KEY] ++;
             }
 
+            //state & state start time.
             if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
                 $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
                 $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
             }
 
-            if ($event->getStatus() == EXT_STATUS_RING) //ringing
+            //computer average talk time.
+            if ($this->agents[$ext][AGENT_UPTIME_KEY] != 0 && $event->getStatus() == EXT_STATUS_IDLE) {
+                $duration = time() - $this->agents[$ext][AGENT_UPTIME_KEY];
+                $average = ($this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] * ($this->agents[$ext][AGENT_UPCALLS_KEY] - 1) + $duration)/$this->agents[$ext][AGENT_UPCALLS_KEY];
+
+                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = $average;
+            }
+            
+            if ($event->getStatus() == EXT_STATUS_RING) 
                 $this->agents[$ext][AGENT_IN_KEY] ++;
         } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
             $this->count_transfered_call($event);
