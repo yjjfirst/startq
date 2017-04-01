@@ -13,7 +13,7 @@ class parser
         {
         }
         
-        public function get_instance($conf_path='queues.conf')
+        public static function get_instance($conf_path='queues.conf')
         {
               if(is_null(self::$_instance))
               {
@@ -139,5 +139,10 @@ class parser
 	{
 		return $this->build_agent_objs();
 	}
+        ///////////////////////////////////////////////////////////////////////////////////
+        public function get_asterisk_options()
+        {
+                return $this->ini_array['asterisk'];
+        }
 }
 ?>
