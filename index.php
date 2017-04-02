@@ -72,6 +72,29 @@ table.imagetable td.green{
 	border-style: solid;
 	border-color: #999999;
 }
+table.imagetable td.yellow{
+	background:#FFCC00;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.brown{
+	background:#663300;
+	color:#FFFFCC;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.pink{
+	background:#FF6666;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
 </style>
 <script language="JavaScript"> 
 function page_reload() 
@@ -96,7 +119,7 @@ function page_reload()
 	 xmlhttp.open("GET","index.php");
      xmlhttp.send();
 */
-    window.location.reload(); 
+    //window.location.reload(); 
 } 
 setTimeout('page_reload()',3000); 
 </script> 

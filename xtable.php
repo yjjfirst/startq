@@ -1,5 +1,6 @@
 <?php
 include_once './debugging_data.php';
+require_once ('parser.php');
 
 class xtable
 {
@@ -123,21 +124,27 @@ class xtable
 				{
 					if($i == 0)
 					{
-						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(1);
+						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(1,array(0,4));
 					}
 					else 
 					{
-						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(3);
+						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(3,array(100,150));
 					}
 				}
 			}
 		}
 	}
-	public function get_item_color($_cloumn_index, $_value)
+	public function get_color_by_range($_cloumn_index, $_value)
 	{
 		$ret_color = 'unset';
 		
 		$colors = $this->color_objs;
+
+		if(!is_integer($_value))
+		{
+			return $ret_color;
+		}
+
 		foreach($colors as $_index=>$color_array)
 		{
 			if($_index == $_cloumn_index)
@@ -153,6 +160,35 @@ class xtable
 		}
 		return $ret_color;
 	}
+    public function get_color_by_value($_cloumn_index, $_value)
+    {
+    	$ret_color = 'unset';
+		
+		$colors = $this->color_objs;
+		
+		//var_dump($_value);
+
+		if(!is_integer($_value))
+		{
+			return $ret_color;
+		}
+
+		foreach($colors as $_index=>$color_array)
+		{
+			if($_index == $_cloumn_index)
+			{
+				foreach($color_array as $_to_value=>$_color)
+				{
+					if($_value == $_to_value)
+					{
+						$ret_color = $_color;
+					}
+				}
+			}
+		}
+		return $ret_color;
+    }
+
 	public function get_agent_queue_name($row,$queue_str)
 	{
 		$queue_id = $queue_str;
@@ -198,6 +234,18 @@ class xtable
 	}
 	//////////////////////////////////////////////////////////////////////////////////
 }
+
+$parser = parser::get_instance();
+$agent_table = new xtable();
+
+$agent_table->set_init_values($parser->get_agent_init_values());
+$agent_table->set_time_items($parser->get_agent_time_items());
+$agent_table->set_column_names($parser->get_agent_cloumn_names());
+$agent_table->set_array_objs($parser->get_agents_objs());
+$agent_table->set_color_objs($parser->get_agent_colors());
+
+//print $agent_table->get_color_by_value(7,"test");
+
 ?>
 
 

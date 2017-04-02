@@ -74,7 +74,7 @@ $groups=$group_table->get_array_objs();
 						$td_class_org = $td_class;
 						foreach($queue as $_index=>$item)
 						{
-							$td_color=$group_table->get_item_color($_index,$item);
+							$td_color=$group_table->get_color_by_range($_index,$item);
 							
 							if($td_color != 'unset')
 							{

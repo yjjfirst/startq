@@ -13,7 +13,7 @@
 	*/
 class debugger
 {
-	function get_random_digit($length)
+	function get_random_digit($length,$range)
 	{
 	    $str = null;
 	    $strPol = "0123456789";
@@ -23,6 +23,12 @@ class debugger
 	    {
 	        $str.=$strPol[rand(0,$max)];
 	    }
+	    $str = intval($str);
+	    if ( $str < intval($range[0]) || $str > intval($range[1]))
+        {
+        	$str = $this->get_random_digit($length, $range);
+        }
+
 	    return $str;
 	}
 }  
