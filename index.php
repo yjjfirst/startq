@@ -119,7 +119,7 @@ function page_reload()
 	 xmlhttp.open("GET","index.php");
      xmlhttp.send();
 */
-    //window.location.reload(); 
+    window.location.reload(); 
 } 
 setTimeout('page_reload()',3000); 
 </script> 
