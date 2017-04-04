@@ -198,6 +198,17 @@ function get_all_queues_name()
     return $queues;
 }
 
+function if_queue_exist($name)
+{
+    $all = get_all_queues_name();
+
+    foreach($all as $n) {
+        if ($n == $name) return true;
+    }
+
+    return false;
+}
+
 function get_vm_from_monitor($name)
 {
    $contents = file_get_contents(QUEUE_STATUS_FILE);
@@ -214,6 +225,8 @@ function get_vm_from_monitor($name)
 
 function get_queue_status($name)
 {
+    if (!if_queue_exist($name)) return NULL;
+    
     $status_events = get_all_queues_status(get_options());
     $summary_events = get_all_queues_summary(get_options());
 
