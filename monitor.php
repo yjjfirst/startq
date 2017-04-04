@@ -161,7 +161,6 @@ class Monitor implements IEventListener
     {
         if (Empty(trim($channel))) return NULL;
 
-        var_dump($channel);
         $ext = explode('-', explode('/', $channel)[1])[0];
 
         return $ext;
@@ -183,6 +182,63 @@ class Monitor implements IEventListener
             $this->agents[trim($user[1])][AGENT_TRANSFERED_CALLS_KEY] ++;
         }
         
+    }
+
+    public function count_out_calls($event, $ext)
+    {
+        if ($event->getStatus() == EXT_STATUS_CALLING
+        && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
+            $this->agents[$ext][AGENT_OUT_KEY] ++;
+        }
+
+    }
+
+    public function handle_state_change($event, $ext)
+    {
+        if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
+            $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
+            $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
+        }
+    }
+
+    public function computer_average_talktime($event, $ext)
+    {
+        if ($this->agents[$ext][AGENT_UPTIME_KEY] != 0 && $event->getStatus() == EXT_STATUS_IDLE) {
+            $duration = time() - $this->agents[$ext][AGENT_UPTIME_KEY];
+            $total =
+                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY]
+                * ($this->agents[$ext][AGENT_UPCALLS_KEY] - 1)
+                + $duration;
+            $average = $total / $this->agents[$ext][AGENT_UPCALLS_KEY];
+            
+            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = $average;
+        }
+    }
+
+    public function count_voicemail($event)
+    {
+        $queues_vm = get_queues_vm();
+        $fd = fopen(QUEUE_STATUS_FILE, "w") or die("Failed to create file:");
+
+        foreach($queues_vm as $key => $queue_vm) {
+            $data = $event->getApplicationData();
+            $vm = explode('@', $data)[0];
+            if ($queue_vm == $vm) {
+                $this->queues_vm["$key"] ++;
+            }
+
+            $count = $this->queues_vm["$key"];
+            fwrite($fd, "$key:");
+            fwrite($fd, "$count");
+            fwrite($fd,"\n");
+        }
+
+        fclose($fd);
+    }
+
+    public function possible_transfer($event)
+    {
+        return strstr($event->getApplicationData(), 'Blind Transfer');
     }
 
     public function handle(EventMessage $event)
