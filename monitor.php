@@ -108,7 +108,8 @@ class Monitor implements IEventListener
         $agents = get_all_agents();
         foreach($agents as $agent) {
             $this->agents[$agent][AGENT_STATE_KEY] = 0;
-            $this->agents[$agent][AGENT_STARTTIME_KEY] = time();
+	    $this->agents[$agent][AGENT_STARTTIME_KEY] = time();
+	    $this->agents[$agent][AGENT_STATE_DURATION_KEY] = 0;
             $this->agents[$agent][AGENT_IN_KEY] = 0;
             $this->agents[$agent][AGENT_OUT_KEY] = 0;
             $this->agents[$agent][AGENT_UPTIME_KEY] = 0;
