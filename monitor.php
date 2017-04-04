@@ -99,10 +99,20 @@ define("EXT_HOLD", 16);
 define("EXT_CHANNEL_CONNECTED", 6);
 define("EXT_NOT_LOGIN", 7);
 
+function get_queues_vm()
+{
+    $queues_vm = array();
+    $queues_vm['6000'] = '4001';
+    $queues_vm['6001'] = '4002';
+
+    return $queues_vm;
+}
+
 class Monitor implements IEventListener
 {
     private $agents = array();
-
+    private $queues_vm = array();
+    
     function Monitor()
     {
         $agents = get_all_agents();
@@ -117,6 +127,11 @@ class Monitor implements IEventListener
             if (!$this->if_agent_login_queue($agent))
                 $this->agents[$agent][AGENT_STATE_KEY] = EXT_NOT_LOGIN;
             $this->agents[$agent][AGENT_AVERAGE_TALK_TIME_KEY] = 0;
+        }
+
+        $queues_vm = get_queues_vm();
+        foreach($queues_vm as $key => $vm) {
+            $this->queues_vm[$key] = 0;
         }
     }
 
@@ -213,6 +228,21 @@ class Monitor implements IEventListener
         }
     }
 
+    public function count_voicemail($event)
+    {
+        $queues_vm = get_queues_vm();
+
+        foreach($queues_vm as $key => $queue_vm) {
+            $data = $event->getApplicationData();
+            $vm = explode('@', $data)[0];
+            if ($queue_vm == $vm) {
+                $this->queues_vm["$key"] ++;
+            }
+        }
+
+        var_dump($this->queues_vm);
+    }
+
     public function possible_transfer($event)
     {
         return strstr($event->getApplicationData(), 'Blind Transfer');
@@ -241,10 +271,12 @@ class Monitor implements IEventListener
             
             if ($event->getStatus() == EXT_STATUS_RING) 
                 $this->agents[$ext][AGENT_IN_KEY] ++;
-        } else if ($name == 'Newexten' && $this->possible_transfer($event)) {
-            $this->count_transfered_call($event);
-        } else if ($this->getApplication() == 'VoiceMail')
-            $this->count_voicemail($event);
+        } else if ($name == 'Newexten') {
+            if ($this->possible_transfer($event)) {
+                $this->count_transfered_call($event);
+            } else if ($event->getApplication() == 'VoiceMail') {
+                $this->count_voicemail($event);
+            }
         } else {
             return;
         }        

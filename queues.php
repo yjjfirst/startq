@@ -110,6 +110,7 @@ define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
 define ("AGENT_AVERAGE_TALK_TIME_KEY", 'average');
 
 define ("EXT_STATUS_FILE", 'ext.tmp');
+define ("QUEUE_STAUS_FILE", 'queue.tmp');
 
 class A implements IEventListener
 {
