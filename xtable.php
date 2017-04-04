@@ -1,6 +1,7 @@
 <?php
-include_once './debugging_data.php';
+require_once ('debugging_data.php');
 require_once ('parser.php');
+include_once ('queues.php');
 
 class xtable
 {
@@ -56,8 +57,8 @@ class xtable
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////
-    public function secs_to_strtime(&$rows_to_adjust)
-    {
+        public function secs_to_strtime(&$rows_to_adjust)
+       {
 		for($i=0;$i<count($rows_to_adjust);$i++)
 		{   
 			if(in_array($i,$this->time_items))
@@ -115,7 +116,7 @@ class xtable
 		$debugger = new debugger();
 		$groups = $this->array_objs;
 		
-        foreach($groups as $group=>$tables)
+                foreach($groups as $group=>$tables)
 		{
 			foreach($tables as $queue=>$queues)
 			{
@@ -124,16 +125,44 @@ class xtable
 				{
 					if($i == 0)
 					{
-						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(1,array(0,4));
+						$this->array_objs[$group][$queue][$i]=
+							$debugger->get_random_digit(1,array(0,4));
 					}
 					else 
 					{
-						$this->array_objs[$group][$queue][$i]=$debugger->get_random_digit(3,array(100,150));
+						$this->array_objs[$group][$queue][$i]=
+							$debugger->get_random_digit(3,array(100,150));
 					}
 				}
 			}
 		}
 	}
+	public function group_retrive_from_asterisk()
+	{
+	    $groups = $this->array_objs;
+
+	    foreach($groups as $group=>$tables)
+	    {
+		    foreach($tables as $queue_name=>$attrs)
+		    {
+                           $this->array_objs[$group][$queue_name]=array_values(get_queue_status($queue_name));
+		    }
+	    }
+	}
+        public function agent_retrive_from_asterisk()
+	{
+	    $agents = $this->array_objs;
+            foreach($agents as $agent=>$tables)
+            {
+	        foreach($tables as $agent_name=>$attrs)
+		{
+			sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+                        $this->array_objs[$agents][$agent_name]=array_values(get_agent_status($_id));
+		}
+	    }
+
+	}	
+
 	public function get_color_by_range($_cloumn_index, $_value)
 	{
 		$ret_color = 'unset';
@@ -236,6 +265,22 @@ class xtable
 }
 
 $parser = parser::get_instance();
+$group_table = new xtable();
+
+$group_table->set_init_values($parser->get_group_init_values());
+$group_table->set_time_items($parser->get_group_time_items());
+$group_table->set_column_names($parser->get_group_cloumn_names());
+$group_table->set_array_objs($parser->get_groups_objs());
+$group_table->set_color_objs($parser->get_group_collors());
+$group_table->set_default_values();
+//$group_table->retrive_from_asterisk();
+$group_table->group_retrive_from_asterisk();
+///////////////////////////////////////////////////////////////////////////////
+$groups=$group_table->get_array_objs();
+
+
+
+$parser = parser::get_instance();
 $agent_table = new xtable();
 
 $agent_table->set_init_values($parser->get_agent_init_values());
@@ -243,9 +288,12 @@ $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
+$agent_table->set_default_values();
+$agent_table->retrive_from_asterisk();
+/////////////////////////////////////////////
+//$agents=$agent_table->agent_retrive_from_asterisk();
 
-//print $agent_table->get_color_by_value(7,"test");
-
+//print_r($agents);
 ?>
 
 

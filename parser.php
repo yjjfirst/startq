@@ -1,20 +1,18 @@
 <?php
 class parser
 {	
-	private $ini_array,$group_objs,$agent_objs,$group_column_color,$agent_column_color;
+    private $ini_array,$group_objs,$agent_objs,$group_column_color,$agent_column_color;
 	
     private static $_instance=null;
 
-	private function __construct()
-	{
+    private function __construct()
+    {
 
-	}
+    }
     private function __clone()
     {
     }
     
-
-
     public static function get_instance($conf_path='queues.conf')
     {
         if(is_null(self::$_instance))
@@ -86,7 +84,7 @@ class parser
 	}
 	public function get_group_cloumn_names()
 	{
-		return array("Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail","Outgoing calls");
+	    return array("Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail");
 	}
 	public function get_groups_objs()
 	{
@@ -142,7 +140,7 @@ class parser
 	}
 	public function get_agent_cloumn_names()
 	{
-		return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
+		return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Outgoing Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
 	}
 	public function get_agents_objs()
 	{
