@@ -109,6 +109,8 @@ define ("AGENT_BOUNCED_CALLS_KEY", 'bounced_calls');
 define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
 define ("AGENT_AVERAGE_TALK_TIME_KEY", 'average');
 
+define ("EXT_STATUS_FILE", 'ext.tmp');
+
 class A implements IEventListener
 {
     public function handle(EventMessage $event)
@@ -241,7 +243,7 @@ function get_agent_status_from_queues($extension, $status)
 
 function get_agent_status_string($exten)
 {
-   $contents = file_get_contents("ext.tmp");
+   $contents = file_get_contents(EXT_STATUS_FILE);
    $contents_array = explode("\n", $contents);
 
    foreach($contents_array as $content) {

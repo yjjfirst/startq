@@ -135,7 +135,7 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
-        $fd = fopen("ext.tmp", "w") or die("Failed to create file:");
+        $fd = fopen(EXT_STATUS_FILE, "w") or die("Failed to create file:");
         $this->dump_agents($fd);        
     }
 
@@ -182,6 +182,42 @@ class Monitor implements IEventListener
         
     }
 
+    public function count_out_calls($event, $ext)
+    {
+        if ($event->getStatus() == EXT_STATUS_CALLING
+        && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
+            $this->agents[$ext][AGENT_OUT_KEY] ++;
+        }
+
+    }
+
+    public function handle_state_change($event, $ext)
+    {
+        if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
+            $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
+            $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
+        }
+    }
+
+    public function computer_average_talktime($event, $ext)
+    {
+        if ($this->agents[$ext][AGENT_UPTIME_KEY] != 0 && $event->getStatus() == EXT_STATUS_IDLE) {
+            $duration = time() - $this->agents[$ext][AGENT_UPTIME_KEY];
+            $total =
+                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY]
+                * ($this->agents[$ext][AGENT_UPCALLS_KEY] - 1)
+                + $duration;
+            $average = $total / $this->agents[$ext][AGENT_UPCALLS_KEY];
+            
+            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = $average;
+        }
+    }
+
+    public function possible_transfer($event)
+    {
+        return strstr($event->getApplicationData(), 'Blind Transfer');
+    }
+
     public function handle(EventMessage $event)
     {
         $name = $event->getName();
@@ -199,33 +235,20 @@ class Monitor implements IEventListener
             
         } else if ($name == 'ExtensionStatus') {
 
-            //count out calls.
-            if ($event->getStatus() == EXT_STATUS_CALLING
-            && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
-                $this->agents[$ext][AGENT_OUT_KEY] ++;
-            }
-
-            //state & state start time.
-            if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
-                $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
-                $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
-            }
-
-            //computer average talk time.
-            if ($this->agents[$ext][AGENT_UPTIME_KEY] != 0 && $event->getStatus() == EXT_STATUS_IDLE) {
-                $duration = time() - $this->agents[$ext][AGENT_UPTIME_KEY];
-                $average = ($this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] * ($this->agents[$ext][AGENT_UPCALLS_KEY] - 1) + $duration)/$this->agents[$ext][AGENT_UPCALLS_KEY];
-
-                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = $average;
-            }
+            $this->count_out_calls($event, $ext);
+            $this->handle_state_change($event, $ext);
+            $this->computer_average_talktime($event, $ext);
             
             if ($event->getStatus() == EXT_STATUS_RING) 
                 $this->agents[$ext][AGENT_IN_KEY] ++;
-        } else if ($name == 'Newexten' && strstr($event->getApplicationData(), 'Blind Transfer')) {
+        } else if ($name == 'Newexten' && $this->possible_transfer($event)) {
             $this->count_transfered_call($event);
+        } else if ($this->getApplication() == 'VoiceMail')
+            $this->count_voicemail($event);
         } else {
             return;
         }        
+
         $this->dump_agents(STDIN);
         $this->save_status();
     }
