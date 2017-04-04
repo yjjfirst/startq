@@ -110,7 +110,7 @@ define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
 define ("AGENT_AVERAGE_TALK_TIME_KEY", 'average');
 
 define ("EXT_STATUS_FILE", 'ext.tmp');
-define ("QUEUE_STAUS_FILE", 'queue.tmp');
+define ("QUEUE_STATUS_FILE", 'queue.tmp');
 
 class A implements IEventListener
 {
@@ -198,6 +198,20 @@ function get_all_queues_name()
     return $queues;
 }
 
+function get_vm_from_monitor($name)
+{
+   $contents = file_get_contents(QUEUE_STATUS_FILE);
+   $contents_array = explode("\n", $contents);
+
+   foreach($contents_array as $content) {
+       $content_array = explode(':', $content);
+       if ($content_array[0] == $name)
+           return $content_array[1];
+   }
+
+   return 0;
+}
+
 function get_queue_status($name)
 {
     $status_events = get_all_queues_status(get_options());
@@ -218,7 +232,7 @@ function get_queue_status($name)
     $status['answered_calls'] = $queue_params->getCompleted();
     $status['average_waiting_time'] = $queue_params->getHoldtime();
     $status['abandoned_call'] = $queue_params->getAbandoned();
-    $status['transferred_vm'] = 10;
+    $status['transferred_vm'] = get_vm_from_monitor();
 
     return $status;
 }

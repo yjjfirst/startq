@@ -173,7 +173,6 @@ class Monitor implements IEventListener
     {
         if (Empty(trim($channel))) return NULL;
 
-        var_dump($channel);
         $ext = explode('-', explode('/', $channel)[1])[0];
 
         return $ext;
@@ -231,6 +230,7 @@ class Monitor implements IEventListener
     public function count_voicemail($event)
     {
         $queues_vm = get_queues_vm();
+        $fd = fopen(QUEUE_STATUS_FILE, "w") or die("Failed to create file:");
 
         foreach($queues_vm as $key => $queue_vm) {
             $data = $event->getApplicationData();
@@ -238,9 +238,14 @@ class Monitor implements IEventListener
             if ($queue_vm == $vm) {
                 $this->queues_vm["$key"] ++;
             }
+
+            $count = $this->queues_vm["$key"];
+            fwrite($fd, "$key:");
+            fwrite($fd, "$count");
+            fwrite($fd,"\n");
         }
 
-        var_dump($this->queues_vm);
+        fclose($fd);
     }
 
     public function possible_transfer($event)
