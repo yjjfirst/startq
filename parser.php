@@ -140,7 +140,7 @@ class parser
 	}
 	public function get_agent_cloumn_names()
 	{
-		return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration","Outgoing Calls");
+		return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Outgoing Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
 	}
 	public function get_agents_objs()
 	{
