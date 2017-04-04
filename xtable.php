@@ -157,7 +157,8 @@ class xtable
 	        foreach($tables as $agent_name=>$attrs)
 		{
 			sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
-                        $this->array_objs[$agents][$agent_name]=array_values(get_agent_status($_id));
+			//print($_id);
+                        $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
 		}
 	    }
 
@@ -193,29 +194,26 @@ class xtable
     {
     	$ret_color = 'unset';
 		
-		$colors = $this->color_objs;
-		
-		//var_dump($_value);
+	$colors = $this->color_objs;
+	if(!array_key_exists($_cloumn_index, $colors))
+	{
+	    return $ret_color;
+	}
 
-		if(!is_integer($_value))
+	foreach($colors as $_index=>$color_array)
+	{
+	    if($_index == $_cloumn_index )
+	    {
+		foreach($color_array as $_to_value=>$_color)
 		{
-			return $ret_color;
+		    if(strlen($color_array[$_to_value])>0 && $_to_value == $_value )
+		    {
+		        $ret_color = $_color;
+		    }
 		}
-
-		foreach($colors as $_index=>$color_array)
-		{
-			if($_index == $_cloumn_index)
-			{
-				foreach($color_array as $_to_value=>$_color)
-				{
-					if($_value == $_to_value)
-					{
-						$ret_color = $_color;
-					}
-				}
-			}
-		}
-		return $ret_color;
+	    }
+	}
+	return $ret_color;
     }
 
 	public function get_agent_queue_name($row,$queue_str)
@@ -264,36 +262,6 @@ class xtable
 	//////////////////////////////////////////////////////////////////////////////////
 }
 
-$parser = parser::get_instance();
-$group_table = new xtable();
-
-$group_table->set_init_values($parser->get_group_init_values());
-$group_table->set_time_items($parser->get_group_time_items());
-$group_table->set_column_names($parser->get_group_cloumn_names());
-$group_table->set_array_objs($parser->get_groups_objs());
-$group_table->set_color_objs($parser->get_group_collors());
-$group_table->set_default_values();
-//$group_table->retrive_from_asterisk();
-$group_table->group_retrive_from_asterisk();
-///////////////////////////////////////////////////////////////////////////////
-$groups=$group_table->get_array_objs();
-
-
-
-$parser = parser::get_instance();
-$agent_table = new xtable();
-
-$agent_table->set_init_values($parser->get_agent_init_values());
-$agent_table->set_time_items($parser->get_agent_time_items());
-$agent_table->set_column_names($parser->get_agent_cloumn_names());
-$agent_table->set_array_objs($parser->get_agents_objs());
-$agent_table->set_color_objs($parser->get_agent_colors());
-$agent_table->set_default_values();
-$agent_table->retrive_from_asterisk();
-/////////////////////////////////////////////
-//$agents=$agent_table->agent_retrive_from_asterisk();
-
-//print_r($agents);
 ?>
 
 

@@ -12,7 +12,8 @@ $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
 $agent_table->set_default_values();
-$agent_table->retrive_from_asterisk();
+//$agent_table->retrive_from_asterisk();
+$agent_table->agent_retrive_from_asterisk();
 /////////////////////////////////////////////
 $agents=$agent_table->get_array_objs();
 for($i=0;$i<count($agents);next($agents),$i++)
@@ -58,6 +59,11 @@ for($i=0;$i<count($agents);next($agents),$i++)
 					$td_class_org = $td_class;
 					foreach($number as $_index=>$item)
 					{
+						if($_index >= count($agent_table->column_names)-1)
+						{
+							continue;
+						}
+
 						$td_color=$agent_table->get_color_by_value($_index,$item);
 						if($td_color != 'unset')
 						{
