@@ -232,7 +232,7 @@ function get_queue_status($name)
     $status['answered_calls'] = $queue_params->getCompleted();
     $status['average_waiting_time'] = $queue_params->getHoldtime();
     $status['abandoned_call'] = $queue_params->getAbandoned();
-    $status['transferred_vm'] = get_vm_from_monitor();
+    $status['transferred_vm'] = get_vm_from_monitor($name);
 
     return $status;
 }
