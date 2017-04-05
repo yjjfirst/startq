@@ -178,12 +178,11 @@ class xtable
         {
 	        foreach($tables as $agent_name=>$attrs)
             {
-                if(!in_array($agent_name,$all_agent_names))
+                sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+                if(!in_array($_id,$all_agent_names))
                 {
                     continue;
                 }
-			    sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
-			    //print($_id);
                 $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
 		    }   
 	    }
