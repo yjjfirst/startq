@@ -14,16 +14,27 @@ class xtable
 		{
 			array_push($_init_rows,$this->init_values[$i]);
 		}
-	}
+    }
+
 	private function _time_strformat($secs) 
-	{
-	  $hour = floor($secs/3600);
-	  $minute = floor(($secs-3600*$hour)/60);
-	  $second = floor((($secs-3600*$hour)-60*$minute)%60);
-	  $ret_fmt= sprintf("%02d:%02d:%02d", $hour,$minute,$second);
-	  
-	  return $ret_fmt;
-	}
+    {
+        $date_str = '';
+        $year = date("Y",$secs);
+
+        if($year > 1970)
+        {
+            $date_str = date('Y-m-d H:i:s', $secs);             
+        }
+        else
+        {
+	        $hour = floor($secs/3600);
+	        $minute = floor(($secs-3600*$hour)/60);
+	        $second = floor((($secs-3600*$hour)-60*$minute)%60);
+	        $date_str= sprintf("%02d:%02d:%02d", $hour,$minute,$second);
+        }
+	  return $date_str;
+    }
+
 	private function _get_column_index($_column_name)
 	{	
 		for($i=0;$i<count($this->column_names);$i++)
@@ -57,8 +68,8 @@ class xtable
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////
-        public function secs_to_strtime(&$rows_to_adjust)
-       {
+    public function secs_to_strtime(&$rows_to_adjust)
+    {
 		for($i=0;$i<count($rows_to_adjust);$i++)
 		{   
 			if(in_array($i,$this->time_items))
@@ -67,7 +78,8 @@ class xtable
 			}
 		}
 	    return $rows_to_adjust;
-	}
+    }
+
 	public function set_default_values($table_objs=NULL)
 	{
 		if(!empty($table_objs))
@@ -111,7 +123,7 @@ class xtable
 		$this->array_objs[$group][$queue][$column_index]=$value;
 		return 0;
 	}
-	public function retrive_from_asterisk()
+	public function retrive_from_debugger()
 	{
 		$debugger = new debugger();
 		$groups = $this->array_objs;
