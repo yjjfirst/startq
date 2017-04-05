@@ -58,7 +58,7 @@ table.imagetable td.yellow{
 }
 	
 table.imagetable td.red{
-	background:#FF0000;
+	background:#C00000;
 	border-width: 1px;
 	padding: 2px;
 	border-style: solid;
@@ -66,21 +66,29 @@ table.imagetable td.red{
 }
 
 table.imagetable td.green{
-	background:#00FF00;
+	background:#92D050;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.yellowish{
+	background:#BF8F00;
 	border-width: 1px;
 	padding: 2px;
 	border-style: solid;
 	border-color: #999999;
 }
 table.imagetable td.yellow{
-	background:#FFCC00;
-	border-width: 1px;
-	padding: 2px;
-	border-style: solid;
-	border-color: #999999;
+    background:#FFFF00;
+    border-width: 1px;
+    padding: 2px;
+    border-style: solid;
+    border-color: #999999;
 }
-table.imagetable td.brown{
-	background:#663300;
+
+table.imagetable td.black{
+	background:#040302;
 	color:#FFFFCC;
 	border-width: 1px;
 	padding: 2px;
