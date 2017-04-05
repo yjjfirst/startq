@@ -128,7 +128,7 @@ class xtable
 		$debugger = new debugger();
 		$groups = $this->array_objs;
 		
-                foreach($groups as $group=>$tables)
+        foreach($groups as $group=>$tables)
 		{
 			foreach($tables as $queue=>$queues)
 			{
@@ -148,84 +148,101 @@ class xtable
 				}
 			}
 		}
-	}
+    }
+
 	public function group_retrive_from_asterisk()
 	{
 	    $groups = $this->array_objs;
+        $all_queue_names = get_all_queues_name(); 
 
 	    foreach($groups as $group=>$tables)
 	    {
 		    foreach($tables as $queue_name=>$attrs)
-		    {
-                           $this->array_objs[$group][$queue_name]=array_values(get_queue_status($queue_name));
+            {
+                if(!in_array($queue_name,$all_queue_names))
+                {
+                    continue;
+                }
+
+                $this->array_objs[$group][$queue_name]=array_values(get_queue_status($queue_name));
 		    }
 	    }
-	}
-        public function agent_retrive_from_asterisk()
+    }
+
+    public function agent_retrive_from_asterisk()
 	{
-	    $agents = $this->array_objs;
-            foreach($agents as $agent=>$tables)
-            {
+        $agents = $this->array_objs;
+        $all_agent_names =  get_all_agents();
+
+        foreach($agents as $agent=>$tables)
+        {
 	        foreach($tables as $agent_name=>$attrs)
-		{
-			sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
-			//print($_id);
-                        $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
-		}
+            {
+                if(!in_array($agent_name,$all_agent_names))
+                {
+                    continue;
+                }
+			    sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+			    //print($_id);
+                $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
+		    }   
 	    }
 
 	}	
 
 	public function get_color_by_range($_cloumn_index, $_value)
 	{
-		$ret_color = 'unset';
-		
+		$ret_color = 'unset';	
 		$colors = $this->color_objs;
 
-		if(!is_integer($_value))
+        if(!empty($_value) && !is_integer($_value))
 		{
 			return $ret_color;
 		}
 
 		foreach($colors as $_index=>$color_array)
-		{
-			if($_index == $_cloumn_index)
-			{
-				foreach($color_array as $_color=>$_range_array)
+        {
+            if($_index != $_cloumn_index)
+            {
+                continue;
+            }
+		    foreach($color_array as $_color=>$_range_array)
+		    {
+			    if($_value>=$_range_array[0] && $_value <= $_range_array[1])
 				{
-					if($_value>=$_range_array[0] && $_value <= $_range_array[1])
-					{
-						$ret_color = $_color;
-					}
+					$ret_color = $_color;
 				}
 			}
 		}
 		return $ret_color;
-	}
+    }
+
     public function get_color_by_value($_cloumn_index, $_value)
     {
-    	$ret_color = 'unset';
-		
-	$colors = $this->color_objs;
-	if(!array_key_exists($_cloumn_index, $colors))
-	{
-	    return $ret_color;
-	}
+    	$ret_color = 'unset';	
+        $colors = $this->color_objs;
 
-	foreach($colors as $_index=>$color_array)
-	{
-	    if($_index == $_cloumn_index )
+	    if(!array_key_exists($_cloumn_index, $colors))
 	    {
-		foreach($color_array as $_to_value=>$_color)
-		{
-		    if(strlen($color_array[$_to_value])>0 && $_to_value == $_value )
-		    {
-		        $ret_color = $_color;
-		    }
-		}
+	        return $ret_color;
 	    }
-	}
-	return $ret_color;
+
+	    foreach($colors as $_index=>$color_array)
+        {
+            if($_index != $_cloumn_index)
+            {
+                continue;
+            }
+
+		    foreach($color_array as $_to_value=>$_color)
+	    	{   
+		        if(strlen($color_array[$_to_value])>0 && $_to_value == $_value )
+		         {
+		             $ret_color = $_color;
+		         }
+	        }
+	    }   
+	    return $ret_color;
     }
 
 	public function get_agent_queue_name($row,$queue_str)

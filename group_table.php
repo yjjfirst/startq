@@ -76,7 +76,6 @@ $groups=$group_table->get_array_objs();
 						foreach($queue as $_index=>$item)
 						{
 							$td_color=$group_table->get_color_by_range($_index,$item);
-							
 							if($td_color != 'unset')
 							{
 								$td_class=sprintf("class=\"%s\"",$td_color);

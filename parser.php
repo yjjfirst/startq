@@ -76,7 +76,7 @@ class parser
 	///////////////////////////////////////////////////////////////////////////////////
 	public function get_group_init_values()
 	{
-		return array("0","0","0","0","0","0","0","0","0");
+		return array("0","0","0","0","0","0","0","0");
 	}
 	public function get_group_time_items()
 	{
@@ -132,7 +132,7 @@ class parser
 	///////////////////////////////////////////////////////////////////////////////////	
 	public function get_agent_init_values()
 	{
-		return array("0","0","0","0","0","0","0","0");
+		return array("0","0","0","0","0","0","0","0","0");
 	}
 	public function get_agent_time_items()
 	{
