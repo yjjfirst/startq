@@ -211,16 +211,18 @@ function if_queue_exist($name)
 
 function get_vm_from_monitor($name)
 {
-   $contents = file_get_contents(QUEUE_STATUS_FILE);
-   $contents_array = explode("\n", $contents);
+    if (!file_exists(QUEUE_STATUS_FILE)) return 0;
+    
+    $contents = file_get_contents(QUEUE_STATUS_FILE);
+    $contents_array = explode("\n", $contents);
 
-   foreach($contents_array as $content) {
-       $content_array = explode(':', $content);
-       if ($content_array[0] == $name)
-           return $content_array[1];
-   }
-
-   return 0;
+    foreach($contents_array as $content) {
+        $content_array = explode(':', $content);
+        if ($content_array[0] == $name)
+            return $content_array[1];
+    }
+    
+    return 0;
 }
 
 function get_queue_status($name)
@@ -312,3 +314,4 @@ function get_agent_status($agent)
     $status[AGENT_BOUNCED_CALLS_KEY] = $status[AGENT_IN_KEY] -$status[AGENT_ANSWERED_CALLS_KEY];
     return $status;
 }
+
