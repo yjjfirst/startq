@@ -144,7 +144,7 @@ class Monitor implements IEventListener
         foreach($this->agents as $agent => $status) {
             fwrite($fd, "$agent:");
             foreach($status as $items => $s) {
-                fwrite ($fd, "$items=>$s ");
+                fwrite ($fd, "$items=$s ");
             }
             fwrite($fd, "\n");
         }
@@ -225,7 +225,7 @@ class Monitor implements IEventListener
                 + $duration;
             $average = $total / $this->agents[$ext][AGENT_UPCALLS_KEY];
             
-            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = $average;
+            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = (int)$average;
         }
     }
 
@@ -287,7 +287,7 @@ class Monitor implements IEventListener
         } else {
             return;
         }        
-        $this->dump_agents(STDIN);
+        //$this->dump_agents(STDIN);
         $this->save_status();
     }
 
