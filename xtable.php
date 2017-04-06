@@ -19,11 +19,11 @@ class xtable
 	private function _time_strformat($secs) 
     {
         $date_str = '';
-        $year = date("Y",$secs);
+        $year = date("Y",(int)$secs);
 
         if($year > 1970)
         {
-            $date_str = date('Y-m-d H:i:s', $secs);             
+            $date_str = date('Y-m-d H:i:s', (int)$secs);             
         }
         else
         {
