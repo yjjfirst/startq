@@ -265,8 +265,22 @@ function get_agent_status_from_queues($extension, $status)
         }
     }
 
-    if (!$found) { 
+    if ($found) {
+        if($event->getPause() == 1)
+            $status[AGENT_STATE_KEY] = AGENT_PAUSED;
+
+        if($event->getStatus() == 5 ||
+        $event->getStatus() == 2 ||
+        $event->getStatus() == 6)  {
+            $status[AGENT_STATE_KEY] = AGENT_BUSY;
+        }
+        else if ($event->getStatus() == 1) {
+            $status[AGENT_STATE_KEY] = AGENT_ABAILABLE;
+        }
+    }
+    else { 
         $status[AGENT_ANSWERED_CALLS_KEY] = 0;
+        $status[AGENT_STATE_KEY] = AGENT_NOT_LOGIN;
     }
     return $status;
 }
@@ -314,4 +328,3 @@ function get_agent_status($agent)
     $status[AGENT_BOUNCED_CALLS_KEY] = $status[AGENT_IN_KEY] -$status[AGENT_ANSWERED_CALLS_KEY];
     return $status;
 }
-

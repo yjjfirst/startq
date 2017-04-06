@@ -287,7 +287,7 @@ class Monitor implements IEventListener
         } else {
             return;
         }        
-//        $this->dump_agents(STDIN);
+        $this->dump_agents(STDIN);
         $this->save_status();
     }
 
