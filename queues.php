@@ -233,11 +233,13 @@ function get_queue_status($name)
     $summary_events = get_all_queues_summary(get_options());
 
     foreach ($status_events as $queue_params) {
-        if ($queue_params->getQueue() == $name) break;
+        if ($queue_params->getName() == "QueueParams")
+            if ($queue_params->getQueue() == $name) break;
     }
 
     foreach($summary_events as $queue_summary) {
-        if ($queue_summary->getQueue() == $name) break;
+        if ($queue_summary->getName() == 'QueueSummary')
+            if ($queue_summary->getQueue() == $name) break;
     }
 
     $status['call_in_queue'] = $queue_params->getCalls();
@@ -255,27 +257,26 @@ function get_queue_status($name)
 function get_agent_status_from_queues($extension, $status)
 {
     $status_events = get_all_queues_status(get_options());
-    $found = FALSE;
+    $match_event = NULL;
 
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
         if ($event->getMemberName() == $extension) {
-            $status[AGENT_ANSWERED_CALLS_KEY] += $event->getCallsTaken();
-            $found = TRUE;
+            $match_event = $event;
         }
     }
 
-    if ($found) {
-        if($event->getPause() == 1)
-            $status[AGENT_STATE_KEY] = AGENT_PAUSED;
 
-        if($event->getStatus() == 5 ||
-        $event->getStatus() == 2 ||
-        $event->getStatus() == 6)  {
+    if ($match_event) {        
+        $status[AGENT_ANSWERED_CALLS_KEY] += $match_event->getCallsTaken();
+        if($match_event->getPaused() == 1) {
+            $status[AGENT_STATE_KEY] = AGENT_PAUSED;
+        }
+        else if($match_event->getStatus() == 5 || $match_event->getStatus() == 2 || $match_event->getStatus() == 6){
             $status[AGENT_STATE_KEY] = AGENT_BUSY;
         }
-        else if ($event->getStatus() == 1) {
-            $status[AGENT_STATE_KEY] = AGENT_ABAILABLE;
+        else if ($match_event->getStatus() == 1) {
+            $status[AGENT_STATE_KEY] = AGENT_AVAILABLE;
         }
     }
     else { 
@@ -302,7 +303,7 @@ function parse_agent_status($status)
     $status_array = explode(' ', $status);
 
     foreach ($status_array as $s) {
-        $items = explode("=>", $s);
+        $items = explode("=", $s);
         if ($items[0] != NULL)
             $result[$items[0]] = $items[1];
     }
@@ -328,3 +329,5 @@ function get_agent_status($agent)
     $status[AGENT_BOUNCED_CALLS_KEY] = $status[AGENT_IN_KEY] -$status[AGENT_ANSWERED_CALLS_KEY];
     return $status;
 }
+
+var_dump(get_queue_status("6009"));
