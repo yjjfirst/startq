@@ -136,7 +136,7 @@ class parser
 	}
 	public function get_agent_time_items()
 	{
-		return array(1,7);
+		return array(1,2,8);
 	}
 	public function get_agent_cloumn_names()
 	{
