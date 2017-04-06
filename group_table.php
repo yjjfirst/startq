@@ -34,7 +34,12 @@ $groups=$group_table->get_array_objs();
 			for($i=0;$i<count($groups);next($groups),$i++)
 			{
 				//print_r($groups
-				$group_name = key($groups);
+                $group_name = key($groups);
+                if(count($groups[$group_name]) == 0)
+                {
+                    continue;
+                }
+
 				$total_items=array();
 				$queues = current($groups);
 				$rows = 0;

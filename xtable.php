@@ -161,6 +161,7 @@ class xtable
             {
                 if(!in_array($queue_name,$all_queue_names))
                 {
+                    unset($this->array_objs[$group][$queue_name]);
                     continue;
                 }
 
@@ -181,6 +182,7 @@ class xtable
                 sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
                 if(!in_array($_id,$all_agent_names))
                 {
+                    unset($this->array_objs[$agent][$agent_name]);
                     continue;
                 }
                 $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));

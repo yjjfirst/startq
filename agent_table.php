@@ -49,7 +49,12 @@ for($i=0;$i<count($agents);next($agents),$i++)
 				    $td_class="class=\"odd\"";
 			    }
 				$item_name=key($agent);
-				$agent_name=$agent_table->get_agent_queue_name($rows-1,$item_name);
+                if(count($agent[$item_name]) == 0)
+                {
+                    continue;
+                }
+
+                $agent_name=$agent_table->get_agent_queue_name($rows-1,$item_name);
 			?>
 				<tr>
 				    <td <?php echo $td_class?>><?php echo $agent_name?></td>
