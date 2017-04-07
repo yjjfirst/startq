@@ -95,7 +95,7 @@ define ("AGENT_HOLD", 1);
 define ("AGENT_AVAILABLE", 2);
 define ("AGENT_BUSY", 3);
 define ("AGENT_PAUSED", 4);
-define ("AGENT_NOT_LOGIN", 5);
+define ("AGENT_NOT_LOGIN", 7);
 
 define ("AGENT_STATE", 'state');
 define ("AGENT_STARTTIME", 'start');
@@ -342,4 +342,3 @@ function get_agent_status($agent)
     $status[AGENT_BOUNCED_CALLS] = $status[AGENT_IN] -$status[AGENT_ANSWERED_CALLS];
     return $status;
 }
- 
