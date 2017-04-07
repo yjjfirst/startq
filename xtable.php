@@ -173,21 +173,22 @@ class xtable
     public function agent_retrive_from_asterisk()
 	{
         $agents = $this->array_objs;
-        $all_agent_names =  get_all_agents();
+        $all_queues_name =  get_all_queues_name();
 
         foreach($agents as $agent=>$tables)
         {
 	        foreach($tables as $agent_name=>$attrs)
             {
                 sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
-                if(!in_array($_id,$all_agent_names))
+                if(!in_array($_id,$all_queues_name))
                 {
                     unset($this->array_objs[$agent][$agent_name]);
                     continue;
                 }
                 $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
 		    }   
-	    }
+        }
+        //print_r($this->array_objs);
 
 	}	
 
@@ -292,6 +293,19 @@ class xtable
 	//////////////////////////////////////////////////////////////////////////////////
 }
 
+
+
+$parser = parser::get_instance();
+$agent_table = new xtable();
+$agent_table->set_init_values($parser->get_agent_init_values());
+$agent_table->set_time_items($parser->get_agent_time_items());
+$agent_table->set_column_names($parser->get_agent_cloumn_names());
+$agent_table->set_array_objs($parser->get_agents_objs());
+$agent_table->set_color_objs($parser->get_agent_colors());
+$agent_table->set_default_values();
+
+$agents=$agent_table->get_array_objs();
+//print_r($agents);
 ?>
 
 
