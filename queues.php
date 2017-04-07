@@ -97,17 +97,17 @@ define ("AGENT_BUSY", 3);
 define ("AGENT_PAUSED", 4);
 define ("AGENT_NOT_LOGIN", 5);
 
-define ("AGENT_STATE_KEY", 'state');
-define ("AGENT_STARTTIME_KEY", 'starttime');
-define ("AGENT_STATE_DURATION_KEY", 'duration');
-define ("AGENT_IN_KEY", 'in');
-define ("AGENT_OUT_KEY", 'out');
-define ("AGENT_UPTIME_KEY", 'uptime');
-define ("AGENT_UPCALLS_KEY", 'upcalls');
-define ("AGENT_ANSWERED_CALLS_KEY", 'answered_calls');
-define ("AGENT_BOUNCED_CALLS_KEY", 'bounced_calls');
-define ("AGENT_TRANSFERED_CALLS_KEY", 'transfered');
-define ("AGENT_AVERAGE_TALK_TIME_KEY", 'average');
+define ("AGENT_STATE", 'state');
+define ("AGENT_STARTTIME", 'start');
+define ("AGENT_STATE_DURATION", 'duration');
+define ("AGENT_IN", 'in');
+define ("AGENT_OUT", 'out');
+define ("AGENT_UPTIME", 'uptime');
+define ("AGENT_UPCALLS", 'up');
+define ("AGENT_ANSWERED_CALLS", 'answered');
+define ("AGENT_BOUNCED_CALLS", 'bounced');
+define ("AGENT_TRANSFERED_CALLS", 'xfer');
+define ("AGENT_AVERAGE_TALK_TIME", 'average');
 
 define ("EXT_STATUS_FILE", 'ext.tmp');
 define ("QUEUE_STATUS_FILE", 'queue.tmp');
@@ -280,22 +280,21 @@ function get_agent_status_from_queues($extension, $status)
         }
     }
 
-
     if ($match_event) {        
-        $status[AGENT_ANSWERED_CALLS_KEY] += $match_event->getCallsTaken();
+        $status[AGENT_ANSWERED_CALLS] += $match_event->getCallsTaken();
         if($match_event->getPaused() == 1) {
-            $status[AGENT_STATE_KEY] = AGENT_PAUSED;
+            $status[AGENT_STATE] = AGENT_PAUSED;
         }
         else if($match_event->getStatus() == 5 || $match_event->getStatus() == 2 || $match_event->getStatus() == 6){
-            $status[AGENT_STATE_KEY] = AGENT_BUSY;
+            $status[AGENT_STATE] = AGENT_BUSY;
         }
         else if ($match_event->getStatus() == 1) {
-            $status[AGENT_STATE_KEY] = AGENT_AVAILABLE;
+            $status[AGENT_STATE] = AGENT_AVAILABLE;
         }
     }
     else { 
-        $status[AGENT_ANSWERED_CALLS_KEY] = 0;
-        $status[AGENT_STATE_KEY] = AGENT_NOT_LOGIN;
+        $status[AGENT_ANSWERED_CALLS] = 0;
+        $status[AGENT_STATE] = AGENT_NOT_LOGIN;
     }
     return $status;
 }
@@ -337,11 +336,10 @@ function get_agent_status($agent)
     $status = get_agent_status_from_monitor($agent);
     $status = get_agent_status_from_queues($agent, $status);
 
-    if ($status[AGENT_STARTTIME_KEY] != 0)
-        $status[AGENT_STATE_DURATION_KEY] = time() - $status[AGENT_STARTTIME_KEY];
+    if ($status[AGENT_STARTTIME] != 0)
+        $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 
-    $status[AGENT_BOUNCED_CALLS_KEY] = $status[AGENT_IN_KEY] -$status[AGENT_ANSWERED_CALLS_KEY];
+    $status[AGENT_BOUNCED_CALLS] = $status[AGENT_IN] -$status[AGENT_ANSWERED_CALLS];
     return $status;
 }
-
-var_dump(agent_belongs("4003"));
+ 

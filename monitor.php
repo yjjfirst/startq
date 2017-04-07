@@ -115,19 +115,19 @@ class Monitor implements IEventListener
     {
         $agents = get_all_agents();
         foreach($agents as $agent) {
-            $this->agents[$agent][AGENT_STATE_KEY] = 0;
-            $this->agents[$agent][AGENT_STARTTIME_KEY] = time();
-            $this->agents[$agent][AGENT_STATE_DURATION_KEY] = 0;
-            $this->agents[$agent][AGENT_IN_KEY] = 0;
-            $this->agents[$agent][AGENT_OUT_KEY] = 0;
-            $this->agents[$agent][AGENT_ANSWERED_CALLS_KEY] = 0;
-            $this->agents[$agent][AGENT_BOUNCED_CALLS_KEY] = 0;
-            $this->agents[$agent][AGENT_TRANSFERED_CALLS_KEY] = 0;
-            $this->agents[$agent][AGENT_AVERAGE_TALK_TIME_KEY] = 0;
-            $this->agents[$agent][AGENT_UPTIME_KEY] = 0;
-            $this->agents[$agent][AGENT_UPCALLS_KEY] = 0;
+            $this->agents[$agent][AGENT_STATE] = 0;
+            $this->agents[$agent][AGENT_STARTTIME] = time();
+            $this->agents[$agent][AGENT_STATE_DURATION] = 0;
+            $this->agents[$agent][AGENT_IN] = 0;
+            $this->agents[$agent][AGENT_OUT] = 0;
+            $this->agents[$agent][AGENT_ANSWERED_CALLS] = 0;
+            $this->agents[$agent][AGENT_BOUNCED_CALLS] = 0;
+            $this->agents[$agent][AGENT_TRANSFERED_CALLS] = 0;
+            $this->agents[$agent][AGENT_AVERAGE_TALK_TIME] = 0;
+            $this->agents[$agent][AGENT_UPTIME] = 0;
+            $this->agents[$agent][AGENT_UPCALLS] = 0;
             if (!$this->if_agent_login_queue($agent))
-                $this->agents[$agent][AGENT_STATE_KEY] = EXT_NOT_LOGIN;
+                $this->agents[$agent][AGENT_STATE] = EXT_NOT_LOGIN;
         }
 
         $this->queues_vm = get_queues_vm();
@@ -166,6 +166,8 @@ class Monitor implements IEventListener
             $ext = explode('-', explode('/', $channel)[1])[0];
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
+        } else if ($name == 'QueueMemberStatus') {
+            $ext = $event->getMemberName();
         }
 
         return $ext;
@@ -188,44 +190,51 @@ class Monitor implements IEventListener
         $ext = $this->get_ext_from_channel($blind_transfer[1]);
 
         if ($ext) {
-            $this->agents[$ext][AGENT_TRANSFERED_CALLS_KEY] ++;
+            $this->agents[$ext][AGENT_TRANSFERED_CALLS] ++;
         }
 
         $user = explode(':', $data_array[2]);
         if (strstr($event->getChannel(), 'xfer')) {
-            $this->agents[trim($user[1])][AGENT_TRANSFERED_CALLS_KEY] ++;
+            $this->agents[trim($user[1])][AGENT_TRANSFERED_CALLS] ++;
         }
         
     }
 
-    public function count_out_calls($event, $ext)
+    public function count_calls($event, $ext)
     {
-        if ($event->getStatus() == EXT_STATUS_CALLING
-        && $this->agents[$ext][AGENT_STATE_KEY] == EXT_STATUS_IDLE) { 
-            $this->agents[$ext][AGENT_OUT_KEY] ++;
+        if ( $this->agents[$ext][AGENT_STATE] == 6
+        && $event->getStatus() == 2) { 
+            $this->agents[$ext][AGENT_ANSWERED_CALLS] ++;
         }
 
+        if ( $this->agents[$ext][AGENT_STATE] == 6
+        && $event->getStatus() == 1) { 
+            $this->agents[$ext][AGENT_BOUNCED_CALLS] ++;
+        }
     }
 
     public function handle_state_change($event, $ext)
     {
-        if ($this->agents[$ext][AGENT_STATE_KEY] != $event->getStatus()) {
-            $this->agents[$ext][AGENT_STARTTIME_KEY] = time();
-            $this->agents[$ext][AGENT_STATE_KEY] = $event->getStatus();
+        if ($this->agents[$ext][AGENT_STATE] != $event->getStatus()) {
+            $this->agents[$ext][AGENT_STARTTIME] = time();
+            $this->agents[$ext][AGENT_STATE] = $event->getStatus();
         }
+
+        if ($event->getStatus() == 6)
+            $this->agents[$ext][AGENT_IN] ++;
     }
 
     public function computer_average_talktime($event, $ext)
     {
-        if ($this->agents[$ext][AGENT_UPTIME_KEY] != 0 && $event->getStatus() == EXT_STATUS_IDLE) {
-            $duration = time() - $this->agents[$ext][AGENT_UPTIME_KEY];
+        if ($this->agents[$ext][AGENT_UPTIME] != 0 && $event->getStatus() == 1) {
+            $duration = time() - $this->agents[$ext][AGENT_UPTIME];
             $total =
-                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY]
-                * ($this->agents[$ext][AGENT_UPCALLS_KEY] - 1)
+                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME]
+                * ($this->agents[$ext][AGENT_UPCALLS] - 1)
                 + $duration;
-            $average = $total / $this->agents[$ext][AGENT_UPCALLS_KEY];
+            $average = $total / $this->agents[$ext][AGENT_UPCALLS];
             
-            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME_KEY] = (int)$average;
+            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME] = (int)$average;
         }
     }
 
@@ -264,19 +273,25 @@ class Monitor implements IEventListener
             return;
         }
 
+        if (strstr($event->getName(), "Queue")) {
+        }
+        
         if ($name == 'Newstate') {
             if ($event->getChannelState() == EXT_CHANNEL_CONNECTED) { 
-                $this->agents[$ext][AGENT_UPTIME_KEY] = time();
-                $this->agents[$ext][AGENT_UPCALLS_KEY] ++;
+                $this->agents[$ext][AGENT_UPTIME] = time();
+                $this->agents[$ext][AGENT_UPCALLS] ++;
             }
             
-        } else if ($name == 'ExtensionStatus') {
-            $this->count_out_calls($event, $ext);
+        } else if ($name == 'QueueMemberStatus') {
+            var_dump($event);
+            $this->count_calls($event, $ext);
             $this->handle_state_change($event,$ext);
             $this->computer_average_talktime($event, $ext);
             
             if ($event->getStatus() == EXT_STATUS_RING) 
-                $this->agents[$ext][AGENT_IN_KEY] ++;
+                $this->agents[$ext][AGENT_IN] ++;
+            $this->dump_agents(STDOUT);
+        
         } else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
@@ -287,7 +302,7 @@ class Monitor implements IEventListener
         } else {
             return;
         }
-        //$this->dump_agents(STDIN);
+        $this->dump_agents(STDIN);
         $this->save_status();
     }
 
