@@ -170,8 +170,12 @@ class parser
 	public function get_agent_state_str($index)
 	{
 		//$state_str = array('Pas logé','Hold','Disponible','Occupé','Pause');
-		$state_str = array('Not logged in Queue','Hold','Available','Busy','Agent is on paused status');
-		if($index >= 0 && $index < count($state_str))
+        $state_str = array('Not logged in Queue','Hold','Available','Busy','Agent is on paused status');
+        if(!is_numeric($index))
+        {
+            return 'Unknown';
+        }
+        else if($index >= 0 && $index < count($state_str))
 		{
 			return $state_str[$index];
 		}
