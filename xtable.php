@@ -199,10 +199,30 @@ class xtable
                 $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($user_name));
 		    }   
         }
-        //print_r($this->array_objs);
+    }	
+    public function agent_retrive_agents()
+    {
+        $all_agents = get_all_agents();
+        $conf_agents = array();
 
-	}	
+        foreach($agents as $agent=>$tables)
+        {
+            foreach($tables as $agent_name=>$attrs)
+            {
+                sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+                $conf_agents[] = $user_name;       
+            }
+        }
 
+        foreach($all_agents as $agent_name)
+        {
+            if(!in_array($agent_name, $conf_agetns))
+            {
+                $this->array_objs["Agents"][$agent_name]=array_values(get_agent_status($agent_name));
+            }
+        }
+    }
+    
 	public function get_color_by_range($_cloumn_index, $_value)
 	{
 		$ret_color = 'unset';	
@@ -309,8 +329,6 @@ class xtable
 	//////////////////////////////////////////////////////////////////////////////////
 }
 
-/*
-
 $parser = parser::get_instance();
 $agent_table = new xtable();
 $agent_table->set_init_values($parser->get_agent_init_values());
@@ -319,10 +337,11 @@ $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
 $agent_table->set_default_values();
-//$agent_table->agent_retrive_from_asterisk();
+$agent_table->agent_retrive_from_asterisk();
+$agent_table->agent_retrive_agents();
 $agents=$agent_table->get_array_objs();
-print_r($agents);
- */
+//print_r($agents);
+
 ?>
 
 

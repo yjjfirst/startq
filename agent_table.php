@@ -14,6 +14,7 @@ $agent_table->set_color_objs($parser->get_agent_colors());
 $agent_table->set_default_values();
 //$agent_table->retrive_from_asterisk();
 $agent_table->agent_retrive_from_asterisk();
+$agent_table->agent_retrive_agents();
 /////////////////////////////////////////////
 $agents=$agent_table->get_array_objs();
 for($i=0;$i<count($agents);next($agents),$i++)
