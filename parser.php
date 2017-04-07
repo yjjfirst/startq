@@ -1,4 +1,6 @@
 <?php
+require_once('queues.php');
+
 class parser
 {	
     private $ini_array,$group_objs,$agent_objs,$group_column_color,$agent_column_color;
@@ -100,7 +102,15 @@ class parser
 		foreach($data_source as $agent=>$queues)
 		{
 			$queue_row = explode(",",$queues);
-			foreach($queue_row as $index=>$queue)
+            $all_agents_name = get_all_agents(); 
+
+            if(!in_array($agent,$all_agents_name))
+            {
+                unset($data_source[$agent]);
+                continue;
+            }
+
+            foreach($queue_row as $index=>$queue)
 			{
 			    $queue_name = $agent."-".$queue;
 				//echo "queue_name = $queue_name\n";
@@ -109,7 +119,7 @@ class parser
 			unset($data_source[$agent]);
 		}
 		$data_source["Agents"]= array();
-		$data_source["Agents"] = $new_row;
+        $data_source["Agents"] = $new_row;
 	}
 	private function build_agent_color_objs()
 	{
@@ -125,14 +135,14 @@ class parser
 	private function build_agent_objs()
 	{
 	   $this->agent_objs = $this->ini_array["agents"];	
-	   $this->parse_to_agentobj($this->agent_objs);
-	   
+       $this->parse_to_agentobj($this->agent_objs);  
+
 	   return $this->agent_objs;
 	}
 	///////////////////////////////////////////////////////////////////////////////////	
 	public function get_agent_init_values()
 	{
-		return array("0","0","0","0","0","0","0","0","0");
+		return array("&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;");
 	}
 	public function get_agent_time_items()
 	{
@@ -175,5 +185,5 @@ class parser
     }
     //////////////////////////////////////////////////////////////////////////////////
 }
-//print_r (parser::get_instance()->get_agent_colors());
+//print_r (parser::get_instance()->get_agents_objs());
 ?>
