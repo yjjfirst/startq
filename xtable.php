@@ -235,6 +235,11 @@ class xtable
     	$ret_color = 'unset';	
         $colors = $this->color_objs;
 
+        if(!is_numeric($_value))
+        {
+            return $ret_color;
+        }
+
 	    if(!array_key_exists($_cloumn_index, $colors))
 	    {
 	        return $ret_color;
