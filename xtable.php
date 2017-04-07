@@ -18,6 +18,11 @@ class xtable
 
 	private function _time_strformat($secs) 
     {
+        if(!is_numeric($secs))
+        {
+            //var_dump($secs);
+            return $secs;
+        }
         $date_str = '';
         $year = date("Y",(int)$secs);
 
@@ -185,7 +190,13 @@ class xtable
                     unset($this->array_objs[$agent][$agent_name]);
                     continue;
                 }
-                $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($_id));
+                $agent_belongs = agent_belongs($user_name);
+                if(!in_array($_id,$agent_belongs))
+                {
+                    continue;
+                }
+
+                $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($user_name));
 		    }   
         }
         //print_r($this->array_objs);
@@ -293,7 +304,7 @@ class xtable
 	//////////////////////////////////////////////////////////////////////////////////
 }
 
-
+/*
 
 $parser = parser::get_instance();
 $agent_table = new xtable();
@@ -303,9 +314,10 @@ $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
 $agent_table->set_default_values();
-
+//$agent_table->agent_retrive_from_asterisk();
 $agents=$agent_table->get_array_objs();
-//print_r($agents);
+print_r($agents);
+ */
 ?>
 
 

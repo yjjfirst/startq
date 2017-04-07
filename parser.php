@@ -142,7 +142,7 @@ class parser
 	///////////////////////////////////////////////////////////////////////////////////	
 	public function get_agent_init_values()
 	{
-		return array("0","0","0","0","0","0","0","0","0");
+		return array("&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;");
 	}
 	public function get_agent_time_items()
 	{
