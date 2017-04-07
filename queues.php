@@ -151,6 +151,20 @@ function is_agent($ext, $a)
     return false;
 }
 
+function agent_belongs($ext)
+{
+    $queues = array();
+    
+    $events = get_all_queues_status(get_options());
+    foreach($events as $event) {
+        if ($event->getName() != 'QueueMember') continue;
+        if ($event->getMemberName() == $ext)
+            $queues[] = $event->getQueue();
+    }
+
+    return $queues;
+}
+
 function get_all_agents()
 {
 
@@ -330,4 +344,4 @@ function get_agent_status($agent)
     return $status;
 }
 
-var_dump(get_queue_status("6009"));
+var_dump(agent_belongs("4003"));
