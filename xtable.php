@@ -202,6 +202,8 @@ class xtable
     }	
     public function agent_retrive_agents()
     {
+        $agents = $this->array_objs;
+
         $all_agents = get_all_agents();
         $conf_agents = array();
 
@@ -214,9 +216,11 @@ class xtable
             }
         }
 
+        print_r($conf_agents);
+        print_r($all_agents);
         foreach($all_agents as $agent_name)
         {
-            if(!in_array($agent_name, $conf_agetns))
+            if(!in_array($agent_name, $conf_agents))
             {
                 $this->array_objs["Agents"][$agent_name]=array_values(get_agent_status($agent_name));
             }
