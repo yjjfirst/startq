@@ -118,8 +118,7 @@ class parser
             }
             unset($data_source[$agent]);
         }
-        $data_source["Agents"]= array();
-        $data_source["Agents"] = $new_row;
+        $data_source = $new_row;
     }
     private function build_agent_color_objs()
     {

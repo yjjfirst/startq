@@ -11,17 +11,11 @@ $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
-$agent_table->set_default_values();
-//$agent_table->retrive_from_asterisk();
+$agent_table->agent_default_values();
 $agent_table->agent_retrive_from_asterisk();
 $agent_table->agent_retrive_agents();
 /////////////////////////////////////////////
 $agents=$agent_table->get_array_objs();
-for($i=0;$i<count($agents);next($agents),$i++)
-{
-    //print_r($agents
-    $agent_name = key($agents);
-    $agent = current($agents);
 ?>
 <!-- Table goes in the document BODY -->
         <table class="imagetable">
@@ -38,7 +32,7 @@ for($i=0;$i<count($agents);next($agents),$i++)
 <?php
     $rows = 0;
     $td_class = "class=\"odd\"";
-    for($j=0;$j<count($agent);$j++,next($agent))
+    for($j=0;$j<count($agents);$j++,next($agents))
     {
         $rows++;
         if($rows%2 == 0)
@@ -49,8 +43,8 @@ for($i=0;$i<count($agents);next($agents),$i++)
         {
             $td_class="class=\"odd\"";
         }
-        $item_name=key($agent);
-        if(count($agent[$item_name]) == 0)
+        $item_name=key($agents);
+        if(count($agents[$item_name]) == 0)
         {
             continue;
         }
@@ -60,7 +54,7 @@ for($i=0;$i<count($agents);next($agents),$i++)
                 <tr>
                     <td <?php echo $td_class?>><?php echo $agent_name?></td>
 <?php
-        $number=$agent["$item_name"];
+        $number=$agents["$item_name"];
         $number = $agent_table->secs_to_strtime($number);
         $td_class_org = $td_class;
         foreach($number as $_index=>$item)
@@ -97,6 +91,3 @@ for($i=0;$i<count($agents);next($agents),$i++)
     }
 ?>
         </table>
-<?php
-}
-?>

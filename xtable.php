@@ -105,6 +105,23 @@ class xtable
             }
         }
     }
+    
+    public function agent_default_values($table_objs=NULL)
+    {
+        if(!empty($table_objs))
+        {
+            $this->array_objs=$table_objs;
+        }
+
+        foreach($this->array_objs as $key=>$value)
+        {
+            $new_row=array();
+            $this->_init_row_data($new_row);
+            unset($this->array_objs[$key]);
+            $this->array_objs[$key]=$new_row;
+        }
+    }
+
     public function set_value($group,$queue,$_column_name,$value)
     {
         if(!in_array($_column_name,$this->column_names))
@@ -127,32 +144,6 @@ class xtable
         }
         $this->array_objs[$group][$queue][$column_index]=$value;
         return 0;
-    }
-    public function retrive_from_debugger()
-    {
-        $debugger = new debugger();
-        $groups = $this->array_objs;
-
-        foreach($groups as $group=>$tables)
-        {
-            foreach($tables as $queue=>$queues)
-            {
-                //skip the 'Queue Id' from column_names
-                for($i=0;$i<count($this->column_names)-1;$i++)
-                {
-                    if($i == 0)
-                    {
-                        $this->array_objs[$group][$queue][$i]=
-                            $debugger->get_random_digit(1,array(0,4));
-                    }
-                    else 
-                    {
-                        $this->array_objs[$group][$queue][$i]=
-                            $debugger->get_random_digit(3,array(100,150));
-                    }
-                }
-            }
-        }
     }
 
     public function group_retrive_from_asterisk()
@@ -340,9 +331,9 @@ $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
-$agent_table->set_default_values();
-$agent_table->agent_retrive_from_asterisk();
-$agent_table->agent_retrive_agents();
+$agent_table->agent_default_values();
+//$agent_table->agent_retrive_from_asterisk();
+//$agent_table->agent_retrive_agents();
 $agents=$agent_table->get_array_objs();
 //print_r($agents);
 
