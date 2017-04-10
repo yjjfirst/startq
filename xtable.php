@@ -171,10 +171,8 @@ class xtable
         $agents = $this->array_objs;
         $all_queues_name =  get_all_queues_name();
 
-        foreach($agents as $agent=>$tables)
+        foreach($agents as $agent_name=>$attrs)
         {
-            foreach($tables as $agent_name=>$attrs)
-            {
                 sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
                 if(!in_array($_id,$all_queues_name))
                 {
@@ -187,8 +185,7 @@ class xtable
                     continue;
                 }
 
-                $this->array_objs[$agent][$agent_name]=array_values(get_agent_status($user_name));
-            }   
+                $this->array_objs[$agent_name]=array_values(get_agent_status($user_name));   
         }
     }	
     public function agent_retrive_agents()
@@ -198,22 +195,19 @@ class xtable
         $all_agents = get_all_agents();
         $conf_agents = array();
 
-        foreach($agents as $agent=>$tables)
+        foreach($agents as $agent_name=>$attrs)
         {
-            foreach($tables as $agent_name=>$attrs)
-            {
-                sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
-                $conf_agents[] = $user_name;       
-            }
+            sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+            $conf_agents[] = $user_name;       
         }
 
-        print_r($conf_agents);
-        print_r($all_agents);
+        //print_r($conf_agents);
+        //print_r($all_agents);
         foreach($all_agents as $agent_name)
         {
             if(!in_array($agent_name, $conf_agents))
             {
-                $this->array_objs["Agents"][$agent_name]=array_values(get_agent_status($agent_name));
+                $this->array_objs[$agent_name]=array_values(get_agent_status($agent_name));
             }
         }
     }
@@ -332,8 +326,8 @@ $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_colors());
 $agent_table->agent_default_values();
-//$agent_table->agent_retrive_from_asterisk();
-//$agent_table->agent_retrive_agents();
+$agent_table->agent_retrive_from_asterisk();
+$agent_table->agent_retrive_agents();
 $agents=$agent_table->get_array_objs();
 //print_r($agents);
 
