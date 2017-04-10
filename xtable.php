@@ -146,10 +146,10 @@ class xtable
         return 0;
     }
 
-    public function group_retrive_from_asterisk()
-    {
-        $groups = $this->array_objs;
-        $all_queue_names = get_all_queues_name(); 
+	public function group_retrive_from_asterisk()
+	{
+	    $groups = $this->array_objs;
+        $all_queue_names = get_all_queues(); 
 
         foreach($groups as $group=>$tables)
         {
@@ -169,7 +169,7 @@ class xtable
     public function agent_retrive_from_asterisk()
     {
         $agents = $this->array_objs;
-        $all_queues_name =  get_all_queues_name();
+        $all_queues_name =  get_all_queues();
 
         foreach($agents as $agent_name=>$attrs)
         {
