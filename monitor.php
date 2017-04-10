@@ -117,7 +117,9 @@ class Monitor implements IEventListener
     
     public function __construct()
     {
+        $queues = get_all_queues();
         $agents = get_all_agents();
+
         foreach($agents as $agent) {
             $this->agents[$agent][AGENT_STATE] = 0;
             $this->agents[$agent][AGENT_STARTTIME] = time();
@@ -141,6 +143,21 @@ class Monitor implements IEventListener
             
     }
 
+    public function dump_all_queues($fd)
+    {
+        $queues = get_all_queues();
+        foreach($queues as $queue) {
+            $this->dump_one_queue($queue, $fd);
+            fwrite($fd, "\n");
+        }
+    }
+
+    public function dump_one_queue($name, $fd)
+    {
+        fwrite($fd, "queue=$name\n");
+        $this->dump_agents($fd);
+    }
+    
     public function dump_agents($fd)
     {
         if (!isset($this->agents)) return;
@@ -283,11 +300,6 @@ class Monitor implements IEventListener
         }
 
         if ($name == 'ExtensionStatus') {
-            echo $ext," ", $name," ",  $event->getStatus();
-            echo "\n";
-            echo $this->agents[$ext][AGENT_STATE];
-            echo "\n";
-            
             if ($event->getStatus() == EXT_STATUS_CALLING
             && $this->agents[$ext][AGENT_STATE] == 1) { 
                 $this->agents[$ext][AGENT_OUT] ++;
@@ -297,14 +309,13 @@ class Monitor implements IEventListener
             $this->count_calls($event, $ext);
             $this->handle_state_change($event,$ext);
             $this->computer_average_talktime($event, $ext);
-            $this->dump_agents(STDOUT);
+            $this->dump_all_queues(STDOUT);
         } else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
             } else if ($event->getApplication() == 'VoiceMail') {
                 $this->count_voicemail($event);
-            }
-            
+            }            
         } 
         else {
             return;

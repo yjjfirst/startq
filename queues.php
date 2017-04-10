@@ -112,28 +112,16 @@ define ("AGENT_AVERAGE_TALK_TIME", 'average');
 define ("EXT_STATUS_FILE", 'ext.tmp');
 define ("QUEUE_STATUS_FILE", 'queue.tmp');
 
-class A implements IEventListener
-{
-    public function handle(EventMessage $event)
-    {
-        var_dump($event);
-    }
-}
+/* class A implements IEventListener */
+/* { */
+/*     public function handle(EventMessage $event) */
+/*     { */
+/*         var_dump($event); */
+/*     } */
+/* } */
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
-function get_all_queues_status()
-{    
-    $a = new ClientImpl(get_options());
-    $a->open();
-    
-    $queues_status = ($a->send(new QueueStatusAction()));
-    $events = $queues_status->getEvents();
-        
-    $a->close();
-    return $events;        
-}
 
 function is_agent($ext, $a)
 {
@@ -187,6 +175,32 @@ function get_all_agents()
     return $agent_names;        
 }
 
+function get_all_agents_in_queue($queue)
+{
+    $status_events = get_all_queues_status(get_options());
+    $agents = array();
+    
+    foreach($status_events as $event) {
+        if ($event->getName() == 'QueueMember' && $event->getQueue() == $queue) {
+            $agents[] = $event->getMemberName();
+        }
+    }
+
+    return $agents;
+}
+
+function get_all_queues_status()
+{    
+    $a = new ClientImpl(get_options());
+    $a->open();
+    
+    $queues_status = ($a->send(new QueueStatusAction()));
+    $events = $queues_status->getEvents();
+        
+    $a->close();
+    return $events;        
+}
+get_all_queues_summary();
 function get_all_queues_summary()
 {
     $a = new ClientImpl(get_options());
@@ -194,12 +208,12 @@ function get_all_queues_summary()
 
     $queues_status = ($a->send(new QueueSummaryAction()));
     $events = $queues_status->getEvents();
-        
+    
     $a->close();
     return $events;
 }
 
-function get_all_queues_name()
+function get_all_queues()
 {
     $status_events = get_all_queues_status(get_options());
 
@@ -214,7 +228,7 @@ function get_all_queues_name()
 
 function if_queue_exist($name)
 {
-    $all = get_all_queues_name();
+    $all = get_all_queues();
 
     foreach($all as $n) {
         if ($n == $name) return true;
