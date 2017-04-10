@@ -276,16 +276,23 @@ class xtable
     public function get_agent_queue_name($row,$queue_str)
     {
         $agent_queue = $queue_str;
-        static $_queue=null;
+        static $agent=null;
 
         sscanf($queue_str, "%[^-]-%[^-]",$queue_id, $new_agent);
-        if($queue_id !=$_queue)
+        //printf("agent= %s, new_agnet= %s\n",$agent, $new_agent);
+
+        if(is_null($new_agent))
         {
-            $_queue=$queue_id;
+            return $agent_queue;
+        }
+
+        if($new_agent!=$agent)
+        {
+            $agent=$new_agent;
         }
         else
         {
-            $agent_queue = sprintf("→%d",$_id);
+            $agent_queue = sprintf("→%d",$queue_id);
         }
 
         return $agent_queue;
