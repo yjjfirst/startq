@@ -173,7 +173,7 @@ class xtable
 
         foreach($agents as $agent_name=>$attrs)
         {
-                sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+                sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
                 if(!in_array($_id,$all_queues_name))
                 {
                     unset($this->array_objs[$agent][$agent_name]);
@@ -197,7 +197,7 @@ class xtable
 
         foreach($agents as $agent_name=>$attrs)
         {
-            sscanf($agent_name, "%[^-]-%[^-]",$user_name, $_id);
+            sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
             $conf_agents[] = $user_name;       
         }
 
@@ -210,6 +210,7 @@ class xtable
                 $this->array_objs[$agent_name]=array_values(get_agent_status($agent_name));
             }
         }
+        //print_r($this->array_objs);
     }
 
     public function get_color_by_range($_cloumn_index, $_value)
@@ -274,20 +275,20 @@ class xtable
 
     public function get_agent_queue_name($row,$queue_str)
     {
-        $queue_id = $queue_str;
-        static $agent=null;
+        $agent_queue = $queue_str;
+        static $_queue=null;
 
-        sscanf($queue_str, "%[^-]-%[^-]",$new_agent, $_id);
-        if($new_agent !=$agent)
+        sscanf($queue_str, "%[^-]-%[^-]",$queue_id, $new_agent);
+        if($queue_id !=$_queue)
         {
-            $agent=$new_agent;
+            $_queue=$queue_id;
         }
         else
         {
-            $queue_id = sprintf("→%d",$_id);
+            $agent_queue = sprintf("→%d",$_id);
         }
 
-        return $queue_id;
+        return $agent_queue;
     }
 
     ////////////////////////////////////////////////////////////////////////////////

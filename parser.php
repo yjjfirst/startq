@@ -112,7 +112,7 @@ class parser
 
             foreach($queue_row as $index=>$queue)
             {
-                $queue_name = $agent."-".$queue;
+                $queue_name = $queue."-".$agent;
                 //echo "queue_name = $queue_name\n";
                 $new_row[$queue_name]=array();
             }
