@@ -2,7 +2,8 @@
 <!-- CSS goes in the document HEAD or added to your external stylesheet -->
 <style type="text/css">
 table.imagetable {
-	font-family: verdana,arial,sans-serif;
+    font-family: verdana,arial,sans-serif;
+    width:100%;
 	font-size:11px;
 	color:#333333;
 	border-width: 1px;
@@ -132,21 +133,9 @@ function page_reload()
 setTimeout('page_reload()',3000); 
 </script> 
 <body>
-<table class="imagetable" width="100%">
-<tr>
-<td class="blank" width="100%"></td>
-</tr>
-</table>
 
 <?php
 include_once("./group_table.php");
-?>
-<table class="imagetable" width="100%">
-<tr>
-<td class="blank" width="100%"></td>
-</tr>
-</table>
-<?php
 include_once("./agent_table.php");
 ?>
 </body>
