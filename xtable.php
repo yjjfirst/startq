@@ -166,6 +166,31 @@ class xtable
         }
     }
 
+    public function group_retrive_reset_queues()
+    {
+       $groups = $this->array_objs;
+       $all_queues_in_config = NULL;
+
+       foreach($groups as $group=>$tables)
+       {
+           foreach($tables as $queue_name=>$attrs)
+           {
+               $all_queues_in_config[]=$queue_name;
+           }
+       }
+
+       $all_queues_asterisk = get_all_queues();
+       foreach($all_queues_asterisk as $queue_name) 
+       {
+           if(!in_array($queue_name,$all_queues_in_config)) 
+           {
+               $this->array_objs["Others"][$queue_name]=array_values(get_queue_status($queue_name)); 
+           }         
+       }
+ 
+    }
+
+
     public function agent_retrive_from_asterisk()
     {
         $agents = $this->array_objs;
@@ -188,7 +213,8 @@ class xtable
                 $this->array_objs[$agent_name]=array_values(get_agent_status($user_name));   
         }
     }	
-    public function agent_retrive_agents()
+    
+    public function agent_retrive_reset_agents()
     {
         $agents = $this->array_objs;
 
@@ -201,8 +227,6 @@ class xtable
             $conf_agents[] = $user_name;       
         }
 
-        //print_r($conf_agents);
-        //print_r($all_agents);
         foreach($all_agents as $agent_name)
         {
             if(!in_array($agent_name, $conf_agents))
@@ -210,7 +234,6 @@ class xtable
                 $this->array_objs[$agent_name]=array_values(get_agent_status($agent_name));
             }
         }
-        //print_r($this->array_objs);
     }
 
     public function get_color_by_range($_cloumn_index, $_value)
@@ -327,17 +350,16 @@ class xtable
 }
 
 $parser = parser::get_instance();
-$agent_table = new xtable();
-$agent_table->set_init_values($parser->get_agent_init_values());
-$agent_table->set_time_items($parser->get_agent_time_items());
-$agent_table->set_column_names($parser->get_agent_cloumn_names());
-$agent_table->set_array_objs($parser->get_agents_objs());
-$agent_table->set_color_objs($parser->get_agent_colors());
-$agent_table->agent_default_values();
-$agent_table->agent_retrive_from_asterisk();
-$agent_table->agent_retrive_agents();
-$agents=$agent_table->get_array_objs();
-//print_r($agents);
+$group_table = new xtable();
+
+$group_table->set_init_values($parser->get_group_init_values());
+$group_table->set_time_items($parser->get_group_time_items());
+$group_table->set_column_names($parser->get_group_cloumn_names());
+$group_table->set_array_objs($parser->get_groups_objs());
+$group_table->set_color_objs($parser->get_group_collors());
+$group_table->set_default_values();
+$group_table->group_retrive_from_asterisk();
+$group_table->group_retrive_reset_queues();
 
 ?>
 
