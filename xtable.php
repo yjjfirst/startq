@@ -210,7 +210,7 @@ class xtable
                     continue;
                 }
 
-                $this->array_objs[$agent_name]=array_values(get_agent_status($user_name));   
+                $this->array_objs[$agent_name]=array_values(get_agent_status($_id, $user_name));   
         }
     }	
     
