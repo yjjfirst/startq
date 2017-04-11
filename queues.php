@@ -112,14 +112,6 @@ define ("AGENT_AVERAGE_TALK_TIME", 'average');
 define ("EXT_STATUS_FILE", 'ext.tmp');
 define ("QUEUE_STATUS_FILE", 'queue.tmp');
 
-/* class A implements IEventListener */
-/* { */
-/*     public function handle(EventMessage $event) */
-/*     { */
-/*         var_dump($event); */
-/*     } */
-/* } */
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -200,7 +192,7 @@ function get_all_queues_status()
     $a->close();
     return $events;        
 }
-get_all_queues_summary();
+
 function get_all_queues_summary()
 {
     $a = new ClientImpl(get_options());
@@ -313,22 +305,35 @@ function get_agent_status_from_queues($extension, $status)
     return $status;
 }
 
-function get_agent_status_string($exten)
+function get_agent_status_string($a_queue, $exten)
 {
    $contents = file_get_contents(EXT_STATUS_FILE);
-   $contents_array = explode("\n", $contents);
+   $queues_array = explode("\n\n", $contents);
 
-   foreach($contents_array as $content) {
-       $content_array = explode(':', $content);
-       if ($content_array[0] == $exten)
-           return $content_array[1];
+   foreach($queues_array as $queue) {
+
+       $agents = explode("\n", $queue);
+       if (count($agents) == 1) continue;
+
+       $queue_name = (explode('=',$agents[0]))[1];
+       if ($queue_name != $a_queue) continue;
+
+       foreach($agents as $agent) {
+           $agent_status = explode(':', $agent);
+           if ($agent_status[0] != $exten) continue;
+
+           return $agent_status[1];
+       }
    }
+
+   return NULL;
 }
 
 function parse_agent_status($status)
 {
     $status_array = explode(' ', $status);
-
+    $resule = array();
+    
     foreach ($status_array as $s) {
         $items = explode("=", $s);
         if ($items[0] != NULL)
@@ -338,21 +343,20 @@ function parse_agent_status($status)
     return $result;
 }
 
-function get_agent_status_from_monitor($agent)
+function get_agent_status_from_monitor($queue, $agent)
 {
-    $string = get_agent_status_string($agent);
+    $string = get_agent_status_string($queue, $agent);
     $status = parse_agent_status($string);
     return $status;
 }
 
-function get_agent_status($agent)
+function get_agent_status($queue, $agent)
 {
-    $status = get_agent_status_from_monitor($agent);
-    $status = get_agent_status_from_queues($agent, $status);
+    $status = get_agent_status_from_monitor($queue, $agent);
+    //$status = get_agent_status_from_queues($agent, $status);
 
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 
-    $status[AGENT_BOUNCED_CALLS] = $status[AGENT_IN] -$status[AGENT_ANSWERED_CALLS];
     return $status;
 }

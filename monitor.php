@@ -35,6 +35,8 @@ use PAMI\Message\Action\DAHDIDialOffHookAction;
 use PAMI\Message\Action\DAHDIDNDOnAction;
 use PAMI\Message\Action\DAHDIDNDOffAction;
 use PAMI\Message\Action\AgentsAction;
+use PAMI\Message\Event\AgentCalledEvent;
+use PAMI\Message\Event\AgentRingNoAnswerEvent;
 use PAMI\Message\Action\AgentLogoffAction;
 use PAMI\Message\Action\MailboxStatusAction;
 use PAMI\Message\Action\MailboxCountAction;
@@ -96,6 +98,8 @@ define("RAW_AGENT_AVAILABLE", 1);
 define("RAW_AGENT_RINGING", 6);
 define("RAW_AGENT_TALK", 2);
 define("RAW_AGENT_UNAVAILABLE", 5);
+define("RAW_AGENT_HOLD", 8);
+define("RAW_AGENT_PAUSED", 100);
 
 define("EXT_STATUS_RING", 8);
 define("EXT_STATUS_IDLE", 0);
@@ -114,14 +118,16 @@ class Monitor implements IEventListener
 {
     private $agents = array();
     private $queues_vm = array();
-    
+    private $queues_status;
+
     public function __construct()
     {
-        $queues = get_all_queues();
-        $agents = get_all_agents();
 
+        $this->queues_status = $this->init_queues_status();
+
+        $agents = get_all_agents();
         foreach($agents as $agent) {
-            $this->agents[$agent][AGENT_STATE] = 0;
+            $this->agents[$agent][AGENT_STATE] = RAW_AGENT_AVAILABLE;
             $this->agents[$agent][AGENT_STARTTIME] = time();
             $this->agents[$agent][AGENT_STATE_DURATION] = 0;
             $this->agents[$agent][AGENT_IN] = 0;
@@ -143,6 +149,36 @@ class Monitor implements IEventListener
             
     }
 
+    public function init_queues_status()
+    {
+        $queues = get_all_queues();
+        $queues_status = array();
+        
+        foreach($queues as $queue) {
+            $queue_status[$queue]  = array();
+            $agents_in_queue = get_all_agents_in_queue($queue);
+            foreach($agents_in_queue as $agent) {
+                $queues_status[$queue][$agent] = array();
+                $agent_status = &$queues_status[$queue][$agent];
+                $agent_status[AGENT_STATE] = RAW_AGENT_AVAILABLE;
+                $agent_status[AGENT_STARTTIME] = time();
+                $agent_status[AGENT_STATE_DURATION] = 0;
+                $agent_status[AGENT_IN] = 0;
+                $agent_status[AGENT_OUT] = 0;
+                $agent_status[AGENT_ANSWERED_CALLS] = 0;
+                $agent_status[AGENT_BOUNCED_CALLS] = 0;
+                $agent_status[AGENT_TRANSFERED_CALLS] = 0;
+                $agent_status[AGENT_AVERAGE_TALK_TIME] = 0;
+                $agent_status[AGENT_UPTIME] = 0;
+                $agent_status[AGENT_UPCALLS] = 0;
+                if (!$this->if_agent_login_queue($agent))
+                    $agent_status = AGENT_NOT_LOGIN;
+            }
+            
+        }
+        return $queues_status;
+    }
+
     public function dump_all_queues($fd)
     {
         $queues = get_all_queues();
@@ -155,14 +191,15 @@ class Monitor implements IEventListener
     public function dump_one_queue($name, $fd)
     {
         fwrite($fd, "queue=$name\n");
-        $this->dump_agents($fd);
+        $this->dump_agents($name, $fd);
     }
     
-    public function dump_agents($fd)
+    public function dump_agents($queue, $fd)
     {
-        if (!isset($this->agents)) return;
-        
-        foreach($this->agents as $agent => $status) {
+        if (!isset($this->queues_status[$queue])) return;
+
+        $agents = $this->queues_status[$queue];
+        foreach($agents as $agent => $status) {
             fwrite($fd, "$agent:");
             foreach($status as $items => $s) {
                 fwrite ($fd, "$items=$s ");
@@ -174,7 +211,7 @@ class Monitor implements IEventListener
     public function save_status()
     {
         $fd = fopen("ext.tmp", "w") or die("Failed to create file:");
-        $this->dump_agents($fd);        
+        $this->dump_all_queues($fd);        
     }
 
     public function get_event_ext($event)
@@ -202,7 +239,21 @@ class Monitor implements IEventListener
 
         return $ext;
     }
-    
+
+    public function inc_transfered_call($ext)
+    {
+        $queues = get_all_queues();
+
+        foreach($queues as $queue) {
+            $agents_in_queue = get_all_agents_in_queue($queue);            
+            foreach($agents_in_queue as $agent) {
+                if ($agent != $ext) continue;
+                $this->queues_status[$queue][$ext][AGENT_TRANSFERED_CALLS] ++;
+            }
+            
+        }
+    }
+
     public function count_transfered_call($event)
     {
         $data_array = explode(',', $event->getApplicationData());
@@ -211,56 +262,59 @@ class Monitor implements IEventListener
         $ext = $this->get_ext_from_channel($blind_transfer[1]);
 
         if ($ext) {
-            $this->agents[$ext][AGENT_TRANSFERED_CALLS] ++;
+            $this->inc_transfered_call($ext);
         }
 
         $user = explode(':', $data_array[2]);
         if (strstr($event->getChannel(), 'xfer')) {
-            $this->agents[trim($user[1])][AGENT_TRANSFERED_CALLS] ++;
+            $this->inc_transfered_call(trim($user[1]));
         }
         
     }
 
-    public function count_calls($event, $ext)
-    {
-        if ( $this->agents[$ext][AGENT_STATE] == RAW_AGENT_RINGING
-        && $event->getStatus() == RAW_AGENT_TALK) { 
-            $this->agents[$ext][AGENT_ANSWERED_CALLS] ++;
-        }
-
-        if ( $this->agents[$ext][AGENT_STATE] == RAW_AGENT_RINGING
-        && $event->getStatus() == RAW_AGENT_AVAILABLE) {
-            $this->agents[$ext][AGENT_BOUNCED_CALLS] ++;
-        }
-
-        if ($event->getStatus() == RAW_AGENT_TALK) {
-            $this->agents[$ext][AGENT_UPTIME] = time();
-            $this->agents[$ext][AGENT_UPCALLS] ++;                
-        }
-    }
-
     public function handle_state_change($event, $ext)
     {
-        if ($this->agents[$ext][AGENT_STATE] != $event->getStatus()) {
-            $this->agents[$ext][AGENT_STARTTIME] = time();
-            $this->agents[$ext][AGENT_STATE] = $event->getStatus();
+        $queue = $event->getQueue();
+        $agent = &$this->queues_status[$queue][$ext];
+
+        if ($event->getStatus() == RAW_AGENT_TALK) {
+            if ($agent[AGENT_STATE] == RAW_AGENT_AVAILABLE){
+                $agent[AGENT_STARTTIME] = time();
+                $agent[AGENT_OUT] ++;
+            }
+            else if ( $agent[AGENT_STATE] == RAW_AGENT_RINGING) { 
+                $agent[AGENT_ANSWERED_CALLS] ++;
+            }
+        }
+        else {
+            $agent[AGENT_STARTTIME] = time();
         }
 
-        if ($event->getStatus() == 6)
-            $this->agents[$ext][AGENT_IN] ++;
+        if ($event->getPause() == 1) {
+            $agent[AGENT_STATE] = RAW_AGENT_PAUSED;
+            return;
+        }
+        
+        if ($agent[AGENT_STATE] != $event->getStatus()) {
+            $agent[AGENT_STATE] = $event->getStatus();
+        }
     }
 
     public function computer_average_talktime($event, $ext)
     {
-        if ($this->agents[$ext][AGENT_UPTIME] != 0 && $event->getStatus() == 1) {
-            $duration = time() - $this->agents[$ext][AGENT_UPTIME];
+        $queue = $event->getQueue();
+        $agent = &$this->queues_status[$queue][$ext];
+
+        if ($agent[AGENT_UPTIME] != 0) {
+            $duration = time() - $agent[AGENT_UPTIME];
             $total =
-                $this->agents[$ext][AGENT_AVERAGE_TALK_TIME]
-                * ($this->agents[$ext][AGENT_UPCALLS] - 1)
+                $agent[AGENT_AVERAGE_TALK_TIME]
+                * ($agent[AGENT_UPCALLS] - 1)
                 + $duration;
-            $average = $total / $this->agents[$ext][AGENT_UPCALLS];
-            
-            $this->agents[$ext][AGENT_AVERAGE_TALK_TIME] = (int)$average;
+            $average = $total / $agent[AGENT_UPCALLS];
+
+            $agent[AGENT_UPTIME] = 0;
+            $agent[AGENT_AVERAGE_TALK_TIME] = (int)$average;
         }
     }
 
@@ -289,28 +343,51 @@ class Monitor implements IEventListener
     {
         return strstr($event->getApplicationData(), 'Blind Transfer');
     }
-
+        
     public function handle(EventMessage $event)
     {
         $name = $event->getName();
         $ext = $this->get_event_ext($event);
+        
+        /* if (strstr ($name, "Queue") || strstr($name, "Agent")) */
+        /*     var_dump($event); */
         
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
 
         if ($name == 'ExtensionStatus') {
-            if ($event->getStatus() == EXT_STATUS_CALLING
-            && $this->agents[$ext][AGENT_STATE] == 1) { 
-                $this->agents[$ext][AGENT_OUT] ++;
-            }
         }
-        else if ($name == 'QueueMemberStatus') {
-            $this->count_calls($event, $ext);
-            $this->handle_state_change($event,$ext);
-            $this->computer_average_talktime($event, $ext);
+        else if ($name == 'AgentRingNoAnswer') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent[AGENT_BOUNCED_CALLS] ++;                
             $this->dump_all_queues(STDOUT);
-        } else if ($name == 'Newexten') {
+        }
+        else if ($name == 'AgentConnect') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent[AGENT_UPTIME] = time();
+            $agent[AGENT_UPCALLS] ++;                
+            $this->dump_all_queues(STDOUT);
+        }
+        else if ($name == 'AgentComplete') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $this->computer_average_talktime($event, $event->getMemberName());
+            $this->dump_all_queues(STDOUT);
+        }
+        else if ($name == 'AgentCalled') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent[AGENT_IN] ++;
+            $this->dump_all_queues(STDOUT);
+        }      
+        else if ($name == 'QueueMemberStatus') {
+            $this->handle_state_change($event,$ext);
+            $this->dump_all_queues(STDOUT);
+        }
+        else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
             } else if ($event->getApplication() == 'VoiceMail') {
