@@ -94,13 +94,6 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
-define("RAW_AGENT_AVAILABLE", 1);
-define("RAW_AGENT_RINGING", 6);
-define("RAW_AGENT_TALK", 2);
-define("RAW_AGENT_UNAVAILABLE", 5);
-define("RAW_AGENT_HOLD", 8);
-define("RAW_AGENT_PAUSED", 100);
-
 define("EXT_STATUS_RING", 8);
 define("EXT_STATUS_IDLE", 0);
 define("EXT_STATUS_CALLING", 1);
