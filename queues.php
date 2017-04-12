@@ -218,7 +218,7 @@ function get_all_queues()
     return $queues;
 }
 
-function if_queue_exist($name)
+function queue_exist($name)
 {
     $all = get_all_queues();
 
@@ -247,7 +247,7 @@ function get_vm_from_monitor($name)
 
 function get_queue_status($name)
 {
-    if (!if_queue_exist($name)) return NULL;
+    if (!queue_exist($name)) return NULL;
     
     $status_events = get_all_queues_status(get_options());
     $summary_events = get_all_queues_summary(get_options());
@@ -272,6 +272,20 @@ function get_queue_status($name)
     $status['transferred_vm'] = get_vm_from_monitor($name);
 
     return $status;
+}
+
+function agent_in_queue($queue, $agent)
+{
+    $status_events = get_all_queues_status(get_options());
+
+    foreach($status_events as $event) {
+        if ($event->getName() != 'QueueMember') continue;
+        if ($event->getQueue() == $queue && $event->getMemberName() == $agent)  {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
 }
 
 function get_agent_status_from_queues($extension, $status)
@@ -352,6 +366,10 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
+    if ($queue == NULL) {
+        return get_agents_status_total($agent);
+    }
+
     $status = get_agent_status_from_monitor($queue, $agent);
     //$status = get_agent_status_from_queues($agent, $status);
 
@@ -359,4 +377,36 @@ function get_agent_status($queue, $agent)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 
     return $status;
+}
+
+function get_agents_status_total($agent)
+{
+    $queues = get_all_queues();
+    $total_status = NULL;;
+    
+    foreach($queues as $queue) {
+        if (!agent_in_queue($queue, $agent)) continue;
+        if ($total_status == NULL) {
+            $total_status = get_agent_status($queue, $agent);
+        }
+        else {
+            $status = get_agent_status($queue, $agent);
+            $total_status[AGENT_IN] += $status[AGENT_IN];
+            $total_status[AGENT_ANSWERED_CALLS] += $status[AGENT_ANSWERED_CALLS];
+            $total_status[AGENT_BOUNCED_CALLS] += $status[AGENT_BOUNCED_CALLS];
+
+            $total_uptimes = $total_status[AGENT_UPCALLS] + $status[AGENT_UPCALLS];
+            if ($total_uptimes != 0) {
+                $total_status[AGENT_AVERAGE_TALK_TIME] =
+                    intval(($total_status[AGENT_UPCALLS] * $total_status[AGENT_AVERAGE_TALK_TIME] +
+                    $status[AGENT_UPCALLS] * $status[AGENT_AVERAGE_TALK_TIME])/$total_uptimes);
+                $total_status[AGENT_UPCALLS] = $total_uptimes;
+            }
+            else {
+                $total_status[AGENT_AVERAGE_TALK_TIME] = 0;
+            }
+        }
+    }
+
+    return $total_status;
 }
