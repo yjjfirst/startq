@@ -1,9 +1,54 @@
 <?php
 require_once('queues.php');
 
+function parse_ini_file_multi($file, $process_sections = false, $scanner_mode = INI_SCANNER_NORMAL) {
+    $explode_str = '.';
+    $escape_char = "'";
+    //load ini file the normal way
+    $data = parse_ini_file($file, $process_sections, $scanner_mode);
+    if (!$process_sections) {
+        $data = array($data);
+    }
+    foreach ($data as $section_key => $section) {
+        // loop inside the section
+        foreach ($section as $key => $value) {
+            if (strpos($key, $explode_str)) {
+                if (substr($key, 0, 1) !== $escape_char) {
+                    // key has a dot. Explode on it, then parse each subkeys
+                    // and set value at the right place thanks to references
+                    $sub_keys = explode($explode_str, $key);
+                    $subs =& $data[$section_key];
+                    foreach ($sub_keys as $sub_key) {
+                        if (!isset($subs[$sub_key])) {
+                            $subs[$sub_key] = '';
+                        }
+                        $subs =& $subs[$sub_key];
+                    }
+                    // set the value at the right place
+                    $subs = $value;
+                    // unset the dotted key, we don't need it anymore
+                    unset($data[$section_key][$key]);
+                }
+                // we have escaped the key, so we keep dots as they are
+                else {
+                    $new_key = trim($key, $escape_char);
+                    $data[$section_key][$new_key] = $value;
+                    unset($data[$section_key][$key]);
+                }
+            }
+        }
+    }
+    if (!$process_sections) {
+        $data = $data[0];
+    }
+    return $data;
+}
+
+
+
 class parser
 {	
-    private $ini_array,$group_objs,$agent_objs;
+    public $ini_array,$group_objs,$agent_objs;
 
     private static $_instance=null;
 
@@ -20,7 +65,7 @@ class parser
         if(is_null(self::$_instance))
         {
             self::$_instance = new parser();
-            self::$_instance->ini_array = parse_ini_file($conf_path, true);
+            self::$_instance->ini_array = parse_ini_file_multi($conf_path, true);
         }
 
         return self::$_instance;
@@ -119,7 +164,7 @@ class parser
     }
     private function build_state_color_objs($colors)
     {
-        $agent_state_color[0] = explode(",",$colors);
+        $agent_state_color[0] = $colors;
         return $agent_state_color;
     }
 
@@ -149,7 +194,7 @@ class parser
     }
     public function get_agent_state_colors()
     {
-        return $this->build_state_color_objs($this->ini_array["agent-colors"][0]);
+        return $this->build_state_color_objs($this->ini_array["agent-colors"]["state"]);
     }
 
     public function get_agent_column_colors()
@@ -159,7 +204,7 @@ class parser
 
         foreach($colors as $index=>$color_range_value)
         {
-            if($index == 0)
+            if($index == 'state')
             {
                 continue;
             }
@@ -202,5 +247,5 @@ class parser
     }
     //////////////////////////////////////////////////////////////////////////////////
 }
-//print_r (parser::get_instance()->get_agents_objs());
+//print_r (parser::get_instance()->ini_array);
 ?>
