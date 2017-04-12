@@ -111,25 +111,40 @@ class Monitor implements IEventListener
 {
     private $queues_vm = array();
     private $queues_status;
-
+    private $queues_origin;
+    
     public function __construct()
     {
 
         $this->queues_status = $this->init_queues_status();
-
+        $this->queues_origin = $this->init_queues_origin();
 
         $this->queues_vm = get_queues_vm();
         foreach($this->queues_vm as $key => $vm) {
             $this->queues_vm[$key] = 0;
+        }            
+    }
+    public function init_queues_origin()
+    {
+        $queues = get_all_queues();
+        $queues_origin = array();
+
+        foreach($queues as $queue) {
+            $status = internal_get_queue_status($queue);
+            $queues_origin[$queue] = array();
+            $queues_origin[$queue]['in'] = $status['inbound_calls'];
+            $queues_origin[$queue]['answered'] = $status['answered_calls'];
+            $queues_origin[$queue]['abandoned'] = $status['abandoned_calls'];            
         }
-            
+        return $queues_origin;
     }
 
     public function init_queues_status()
     {
+
         $queues = get_all_queues();
         $queues_status = array();
-        
+                
         foreach($queues as $queue) {
             $queue_status[$queue]  = array();
             $agents_in_queue = get_all_agents_in_queue($queue);
@@ -166,7 +181,10 @@ class Monitor implements IEventListener
 
     public function dump_one_queue($name, $fd)
     {
-        fwrite($fd, "queue=$name\n");
+        $in = $this->queues_origin[$name]['in'];
+        $answered = $this->queues_origin[$name]['answered'];
+        $abandoned = $this->queues_origin[$name]['abandoned'];
+        fwrite($fd, "queue=$name in=$in answered=$answered abandoned=$abandoned\n");
         $this->dump_agents($name, $fd);
     }
     
