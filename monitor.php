@@ -109,7 +109,6 @@ function get_queues_vm()
 
 class Monitor implements IEventListener
 {
-    private $agents = array();
     private $queues_vm = array();
     private $queues_status;
 
@@ -118,22 +117,6 @@ class Monitor implements IEventListener
 
         $this->queues_status = $this->init_queues_status();
 
-        $agents = get_all_agents();
-        foreach($agents as $agent) {
-            $this->agents[$agent][AGENT_STATE] = RAW_AGENT_AVAILABLE;
-            $this->agents[$agent][AGENT_STARTTIME] = time();
-            $this->agents[$agent][AGENT_STATE_DURATION] = 0;
-            $this->agents[$agent][AGENT_IN] = 0;
-            $this->agents[$agent][AGENT_OUT] = 0;
-            $this->agents[$agent][AGENT_ANSWERED_CALLS] = 0;
-            $this->agents[$agent][AGENT_BOUNCED_CALLS] = 0;
-            $this->agents[$agent][AGENT_TRANSFERED_CALLS] = 0;
-            $this->agents[$agent][AGENT_AVERAGE_TALK_TIME] = 0;
-            $this->agents[$agent][AGENT_UPTIME] = 0;
-            $this->agents[$agent][AGENT_UPCALLS] = 0;
-            if (!$this->if_agent_login_queue($agent))
-                $this->agents[$agent][AGENT_STATE] = AGENT_NOT_LOGIN;
-        }
 
         $this->queues_vm = get_queues_vm();
         foreach($this->queues_vm as $key => $vm) {

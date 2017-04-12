@@ -422,5 +422,3 @@ function get_agents_status_total($agent)
 
     return $total_status;
 }
-
-var_dump(get_agent_status("6000", "4002"));
