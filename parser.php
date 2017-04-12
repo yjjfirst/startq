@@ -169,17 +169,21 @@ class parser
     public function get_agent_state_str($index)
     {
         //$state_str = array('Pas logé','Hold','Disponible','Occupé','Pause');
-        $state_str = array('Not logged in Queue','Hold','Available','Busy','Agent is on paused status');
+        $state_str[AGENT_HOLD]='Hold';
+        $state_str[AGENT_AVAILABLE]='Available';
+        $state_str[AGENT_BUSY]='Busy';
+        $state_str[AGENT_PAUSED]='Paused';
+        $state_str[AGENT_NOT_LOGIN]='Not logged in Queue';
+
         if(!is_numeric($index))
         {
-            return 'Unknown';
+            return 'UNKNOWN';
         }
         else if($index >= 0 && $index < count($state_str))
         {
             return $state_str[$index];
         }
-
-        return 'Unknown';
+        return 'UNKNOWN';
     }
     ///////////////////////////////////////////////////////////////////////////////////
     public function get_asterisk_options()
