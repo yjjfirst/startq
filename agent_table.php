@@ -10,7 +10,7 @@ $agent_table->set_init_values($parser->get_agent_init_values());
 $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
 $agent_table->set_array_objs($parser->get_agents_objs());
-$agent_table->set_color_objs($parser->get_agent_colors());
+$agent_table->set_color_objs($parser->get_agent_state_colors());
 $agent_table->agent_default_values();
 $agent_table->agent_retrive_from_asterisk();
 //$agent_table->agent_retrive_reset_agents();
@@ -63,8 +63,16 @@ $agents=$agent_table->get_array_objs();
             {
                 continue;
             }
-
-            $td_color=$agent_table->get_color_by_value($_index,$item);
+            if($_index == 0)
+            {
+                $agent_table->set_color_objs($parser->get_agent_state_colors());
+                $td_color=$agent_table->get_color_by_value($_index,$item);
+            }
+            else 
+            {
+                $agent_table->set_color_objs($parser->get_agent_column_colors());                
+                $td_color=$agent_table->get_color_by_range($_index,$item);
+            }
             if($td_color != 'unset')
             {
                 $td_class=sprintf("class=\"%s\"",$td_color);

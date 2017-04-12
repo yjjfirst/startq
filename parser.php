@@ -3,7 +3,7 @@ require_once('queues.php');
 
 class parser
 {	
-    private $ini_array,$group_objs,$agent_objs,$group_column_color,$agent_column_color;
+    private $ini_array,$group_objs,$agent_objs;
 
     private static $_instance=null;
 
@@ -52,13 +52,12 @@ class parser
         }
         return $this->group_objs;
     }
-    private function build_group_color_objs()
+    private function build_color_range_objs($column_color)
     {
-        $this->group_column_color = $this->ini_array["queue-colors"];
-        foreach($this->group_column_color as $i=>$color_range)
+        foreach($column_color as $i=>$color_range)
         {
             $range_obj = explode(",",$color_range);
-            unset($this->group_column_color[$i]);
+            unset($column_color[$i]);
             foreach($range_obj as $j=>$color_range)
             {
                 $min=-1;
@@ -67,13 +66,11 @@ class parser
 
                 unset($range_obj[$j]);
                 sscanf($color_range, "[%d-%d]%s",$min, $max, $color);
-                //echo "min=$min, max=$max, color=$color\n";
                 $range_obj[$color]=array($min,$max);
-                //print_r($range_obj);
             }
-            $this->group_column_color[$i]=$range_obj;
+            $column_color[$i]=$range_obj;
         }
-        return $this->group_column_color;
+        return $column_color;
     }
     ///////////////////////////////////////////////////////////////////////////////////
     public function get_group_init_values()
@@ -94,7 +91,7 @@ class parser
     }
     public function get_group_collors()
     {
-        return $this->build_group_color_objs();
+        return $this->build_color_range_objs($this->ini_array["queue-colors"]);
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////
     private function parse_to_agentobj(&$data_source)
@@ -120,17 +117,12 @@ class parser
         }
         $data_source = $new_row;
     }
-    private function build_agent_color_objs()
+    private function build_state_color_objs($colors)
     {
-        $this->agent_column_color = $this->ini_array["agent-colors"];
-        foreach($this->agent_column_color as $i=>$_colors)
-        {
-            unset($this->agent_column_color[$i]);
-            $_colors = explode(",",$_colors);
-            $this->agent_column_color[$i]=$_colors;
-        }
-        return $this->agent_column_color;
+        $agent_state_color[0] = explode(",",$colors);
+        return $agent_state_color;
     }
+
     private function build_agent_objs()
     {
         $this->agent_objs = $this->ini_array["agents"];	
@@ -155,10 +147,28 @@ class parser
     {
         return $this->build_agent_objs();
     }
-    public function get_agent_colors()
+    public function get_agent_state_colors()
     {
-        return $this->build_agent_color_objs();
+        return $this->build_state_color_objs($this->ini_array["agent-colors"][0]);
     }
+
+    public function get_agent_column_colors()
+    {
+        $colors=$this->ini_array["agent-colors"];
+        $color_range = NULL;
+
+        foreach($colors as $index=>$color_range_value)
+        {
+            if($index == 0)
+            {
+                continue;
+            }
+            $color_range[$index]=$color_range_value;
+        }
+
+        return $this->build_color_range_objs($color_range);
+    }
+
     /*
     •	Pas logé (Not logged in Queue)
     •	Hold (Hold)
