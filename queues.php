@@ -252,10 +252,35 @@ function get_vm_from_monitor($name)
     return 0;
 }
 
-
 function get_queue_status($name)
 {
-    return internal_get_queue_status($name);
+    $status =  internal_get_queue_status($name);
+
+    $contents = file_get_contents(EXT_STATUS_FILE);
+    $queues_array = explode("\n\n", $contents);
+
+    foreach($queues_array as $queue) {
+        
+        $agents = explode("\n", $queue);
+        $origins = explode(' ',$agents[0]);
+
+        $queue_name = explode('=', $origins[0]);
+        if (isset($queue_name[1]))
+            $queue_name = $queue_name[1];
+
+        if ($queue_name != $name) continue;
+        if (isset($origins[1])) {
+            $in = explode('=',$origins[1])[1];
+            $answered = explode('=',$origins[2])[1];
+            $abandoned = explode('=',$origins[3])[1];
+        }
+    }   
+
+    $status['inbound_calls'] -= $in;
+    $status['answered_calls'] -= $answered;
+    $status['abandoned_calls'] -= $abandoned;
+    
+    return $status;
 }
 
 function internal_get_queue_status($name)
