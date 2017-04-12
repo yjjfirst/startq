@@ -91,10 +91,17 @@ use PAMI\Message\Action\DongleResetAction;
 use PAMI\Message\Action\DongleSendUSSDAction;
 use PAMI\Message\Action\DongleSendPDUAction;
 
-define ("AGENT_HOLD", 1);
-define ("AGENT_AVAILABLE", 2);
+define("RAW_AGENT_AVAILABLE", 1);
+define("RAW_AGENT_RINGING", 6);
+define("RAW_AGENT_TALK", 2);
+define("RAW_AGENT_UNAVAILABLE", 5);
+define("RAW_AGENT_HOLD", 8);
+define("RAW_AGENT_PAUSED", 100);
+
+define ("AGENT_AVAILABLE", 1);
 define ("AGENT_BUSY", 3);
-define ("AGENT_PAUSED", 4);
+define ("AGENT_HOLD", 8);
+define ("AGENT_PAUSED", 100);
 define ("AGENT_NOT_LOGIN", 7);
 
 define ("AGENT_STATE", 'state');
@@ -366,8 +373,11 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
+    $status = array();
+
     if ($queue == NULL) {
-        return get_agents_status_total($agent);
+        $status = get_agents_status_total($agent);
+        goto out;
     }
 
     $status = get_agent_status_from_monitor($queue, $agent);
@@ -375,7 +385,9 @@ function get_agent_status($queue, $agent)
 
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
-
+  out:
+    if ($status[AGENT_STATE] == RAW_AGENT_RINGING || $status[AGENT_STATE] == RAW_AGENT_TALK)
+        $status[AGENT_STATE] = AGENT_BUSY;
     return $status;
 }
 
@@ -410,3 +422,5 @@ function get_agents_status_total($agent)
 
     return $total_status;
 }
+
+var_dump(get_agent_status("6000", "4002"));
