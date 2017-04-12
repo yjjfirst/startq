@@ -13,7 +13,7 @@ $group_table->set_array_objs($parser->get_groups_objs());
 $group_table->set_color_objs($parser->get_group_collors());
 $group_table->set_default_values();
 $group_table->group_retrive_from_asterisk();
-$group_table->group_retrive_reset_queues();
+$group_table->group_retrive_rest_queues();
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
 ?>

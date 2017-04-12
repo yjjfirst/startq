@@ -13,7 +13,7 @@ $agent_table->set_array_objs($parser->get_agents_objs());
 $agent_table->set_color_objs($parser->get_agent_state_colors());
 $agent_table->agent_default_values();
 $agent_table->agent_retrive_from_asterisk();
-//$agent_table->agent_retrive_reset_agents();
+$agent_table->agent_retrive_rest_agents();
 /////////////////////////////////////////////
 $agents=$agent_table->get_array_objs();
 ?>

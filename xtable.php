@@ -166,7 +166,7 @@ class xtable
         }
     }
 
-    public function group_retrive_reset_queues()
+    public function group_retrive_rest_queues()
     {
        $groups = $this->array_objs;
        $all_queues_in_config = NULL;
@@ -214,7 +214,7 @@ class xtable
         }
     }	
     
-    public function agent_retrive_reset_agents()
+    public function agent_retrive_rest_agents()
     {
         $agents = $this->array_objs;
 
@@ -231,7 +231,7 @@ class xtable
         {
             if(!in_array($agent_name, $conf_agents))
             {
-                $this->array_objs[$agent_name]=array_values(get_agent_status($agent_name));
+                $this->array_objs[$agent_name]=array_values(get_agent_status(NULL, $agent_name));
             }
         }
     }
@@ -348,18 +348,6 @@ class xtable
     }
     //////////////////////////////////////////////////////////////////////////////////
 }
-
-$parser = parser::get_instance();
-$group_table = new xtable();
-
-$group_table->set_init_values($parser->get_group_init_values());
-$group_table->set_time_items($parser->get_group_time_items());
-$group_table->set_column_names($parser->get_group_cloumn_names());
-$group_table->set_array_objs($parser->get_groups_objs());
-$group_table->set_color_objs($parser->get_group_collors());
-$group_table->set_default_values();
-$group_table->group_retrive_from_asterisk();
-$group_table->group_retrive_reset_queues();
 
 ?>
 
