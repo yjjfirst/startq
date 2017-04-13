@@ -86,6 +86,7 @@ class parser
         unset($data_source["$table_name"]);
         $data_source["$table_name"]=$new_table;
     }
+
     private function build_group_objs()
     {
         $this->group_objs = $this->ini_array["groups"];	
@@ -97,6 +98,7 @@ class parser
         }
         return $this->group_objs;
     }
+
     private function build_color_range_objs($column_color)
     {
         foreach($column_color as $i=>$color_range)
@@ -178,7 +180,7 @@ class parser
     ///////////////////////////////////////////////////////////////////////////////////	
     public function get_agent_init_values()
     {
-        return array("&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;");
+        return array(strval(AGENT_NOT_LOGIN),"&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;");
     }
     public function get_agent_time_items()
     {
@@ -230,15 +232,17 @@ class parser
         $state_str[AGENT_PAUSED]='Paused';
         $state_str[AGENT_NOT_LOGIN]='Not logged in Queue';
 
+        $ret_str = 'UNKNOWN';
+
         if(!is_numeric($index))
         {
-            return 'UNKNOWN';
+            return $ret_str;
         }
-        else if($index >= 0 && $index < count($state_str))
+        else if($index >= AGENT_AVAILABLE && $index <= AGENT_PAUSED)
         {
             return $state_str[$index];
         }
-        return 'UNKNOWN';
+        return $ret_str;
     }
     ///////////////////////////////////////////////////////////////////////////////////
     public function get_asterisk_options()
