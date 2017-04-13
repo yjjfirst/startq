@@ -16,6 +16,10 @@ $group_table->group_retrive_from_asterisk();
 $group_table->group_retrive_rest_queues();
 /////////////////////////////////////////////////////////////////////////////
 $groups=$group_table->get_array_objs();
+define("GROUP_LONGEST",'1');
+define ("GROUP_AVERAGE",'5');
+$group_longest = 0;
+$group_average = 0;
 ?>
 <!-- Table goes in the document BODY -->
         <table class="imagetable">
@@ -76,6 +80,12 @@ for($i=0;$i<count($groups);next($groups),$i++)
             else
                 $total_items[$j]+=$queue[$j];
         }
+        if($group_longest < $queue[GROUP_LONGEST] )
+        {
+            $group_longest = $queue[GROUP_LONGEST];
+            printf("%s\n",$group_longest);
+        }
+
         $queue = $group_table->secs_to_strtime($queue);
         $td_class_org = $td_class;
         foreach($queue as $_index=>$item)
@@ -89,7 +99,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
             {
                 $td_class = $td_class_org;
             }
-?>
+            ?>
                             <td <?php echo $td_class?>><?php echo $item?></td>
 <?php
         }
@@ -97,7 +107,10 @@ for($i=0;$i<count($groups);next($groups),$i++)
                     </tr>
 <?php
     }
+    $total_items[GROUP_LONGEST] = $group_longest;
+    $total_items[GROUP_AVERAGE] = round((int)$total_items[GROUP_AVERAGE]/$rows);
     $total_items = $group_table->secs_to_strtime($total_items);
+
     $rows++;
     if($rows%2 == 0)
     {	 

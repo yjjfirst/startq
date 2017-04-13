@@ -198,19 +198,19 @@ class xtable
 
         foreach($agents as $agent_name=>$attrs)
         {
-                sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
-                if(!in_array($_id,$all_queues_name))
-                {
-                    unset($this->array_objs[$agent][$agent_name]);
-                    continue;
-                }
-                $agent_belongs = agent_belongs($user_name);
-                if(!in_array($_id,$agent_belongs))
-                {
-                    continue;
-                }
+            sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
+            if(!in_array($_id,$all_queues_name))
+            {
+                unset($this->array_objs[$agent][$agent_name]);
+                continue;
+            }
+            $agent_belongs = agent_belongs($user_name);
+            if(!in_array($_id,$agent_belongs))
+            {
+                continue;
+            }
 
-                $this->array_objs[$agent_name]=array_values(get_agent_status($_id, $user_name));   
+            $this->array_objs[$agent_name]=array_values(get_agent_status($_id, $user_name));   
         }
     }	
     
