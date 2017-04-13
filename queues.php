@@ -254,6 +254,37 @@ function get_vm_from_monitor($name)
 
 function get_queue_status($name)
 {
+    $status =  internal_get_queue_status($name);
+
+    $contents = file_get_contents(EXT_STATUS_FILE);
+    $queues_array = explode("\n\n", $contents);
+
+    foreach($queues_array as $queue) {
+        
+        $agents = explode("\n", $queue);
+        $origins = explode(' ',$agents[0]);
+
+        $queue_name = explode('=', $origins[0]);
+        if (isset($queue_name[1]))
+            $queue_name = $queue_name[1];
+
+        if ($queue_name != $name) continue;
+        if (isset($origins[1])) {
+            $in = explode('=',$origins[1])[1];
+            $answered = explode('=',$origins[2])[1];
+            $abandoned = explode('=',$origins[3])[1];
+        }
+    }   
+
+    $status['inbound_calls'] -= $in;
+    $status['answered_calls'] -= $answered;
+    $status['abandoned_calls'] -= $abandoned;
+    
+    return $status;
+}
+
+function internal_get_queue_status($name)
+{
     if (!queue_exist($name)) return NULL;
     
     $status_events = get_all_queues_status(get_options());
@@ -272,10 +303,10 @@ function get_queue_status($name)
     $status['call_in_queue'] = $queue_params->getCalls();
     $status['longest_waiting_time'] = $queue_summary->getLongestHoldTime();
     $status['agent_available'] = $queue_summary->getAvailable();
-    $status['inbould_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
+    $status['inbound_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
     $status['answered_calls'] = $queue_params->getCompleted();
     $status['average_waiting_time'] = $queue_params->getHoldtime();
-    $status['abandoned_call'] = $queue_params->getAbandoned();
+    $status['abandoned_calls'] = $queue_params->getAbandoned();
     $status['transferred_vm'] = get_vm_from_monitor($name);
 
     return $status;
@@ -336,8 +367,10 @@ function get_agent_status_string($a_queue, $exten)
        $agents = explode("\n", $queue);
        if (count($agents) == 1) continue;
 
-       $queue_name = (explode('=',$agents[0]))[1];
-       if ($queue_name != $a_queue) continue;
+       $queue_name = explode(' ',$agents[0])[0];
+       $queue_name = explode('=',$queue_name)[1];
+
+       if ($queue_name != $a_queue) continue;       
 
        foreach($agents as $agent) {
            $agent_status = explode(':', $agent);
@@ -352,6 +385,8 @@ function get_agent_status_string($a_queue, $exten)
 
 function parse_agent_status($status)
 {
+    if (!isset($status)) return NULL;
+    
     $status_array = explode(' ', $status);
     $resule = array();
     
@@ -423,4 +458,4 @@ function get_agents_status_total($agent)
     return $total_status;
 }
 
-var_dump(get_agent_status("6000", "4002"));
+get_agent_status("6000", "4002");
