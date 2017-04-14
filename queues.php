@@ -116,8 +116,8 @@ define ("AGENT_BOUNCED_CALLS", 'bounced');
 define ("AGENT_TRANSFERED_CALLS", 'xfer');
 define ("AGENT_AVERAGE_TALK_TIME", 'average');
 
-define ("EXT_STATUS_FILE", 'ext.tmp');
-define ("QUEUE_STATUS_FILE", 'queue.tmp');
+define ("QUEUES_STATUS_FILE", 'queues.tmp');
+define ("QUEUE_VM_FILE", 'vm.tmp');
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -238,9 +238,9 @@ function queue_exist($name)
 
 function get_vm_from_monitor($name)
 {
-    if (!file_exists(QUEUE_STATUS_FILE)) return 0;
+    if (!file_exists(QUEUE_VM_FILE)) return 0;
     
-    $contents = file_get_contents(QUEUE_STATUS_FILE);
+    $contents = file_get_contents(QUEUE_VM_FILE) or die("Failed to create file QUEUE_VM_FILE");
     $contents_array = explode("\n", $contents);
 
     foreach($contents_array as $content) {
@@ -254,13 +254,17 @@ function get_vm_from_monitor($name)
 
 function get_queue_status($name)
 {
+    $SEMKEY = 1; 
+    $sem_id = sem_get($SEMKEY, 1);
+    
+    sem_acquire($sem_id);
+
     $status =  internal_get_queue_status($name);
 
-    $contents = file_get_contents(EXT_STATUS_FILE);
+    $contents = file_get_contents(QUEUES_STATUS_FILE) or die("Failed to open file QUEUES_STATUS_FILE");
     $queues_array = explode("\n\n", $contents);
-
+    
     foreach($queues_array as $queue) {
-        
         $agents = explode("\n", $queue);
         $origins = explode(' ',$agents[0]);
 
@@ -269,17 +273,21 @@ function get_queue_status($name)
             $queue_name = $queue_name[1];
 
         if ($queue_name != $name) continue;
+
         if (isset($origins[1])) {
             $in = explode('=',$origins[1])[1];
             $answered = explode('=',$origins[2])[1];
             $abandoned = explode('=',$origins[3])[1];
+            
+            $status['inbound_calls'] -= $in;
+            $status['answered_calls'] -= $answered;
+            $status['abandoned_calls'] -= $abandoned;
+            break;
         }
     }   
 
-    $status['inbound_calls'] -= $in;
-    $status['answered_calls'] -= $answered;
-    $status['abandoned_calls'] -= $abandoned;
-    
+    sem_release($sem_id);
+
     return $status;
 }
 
@@ -326,61 +334,70 @@ function agent_in_queue($queue, $agent)
     return FALSE;
 }
 
-function get_agent_status_from_queues($extension, $status)
+function get_agent_init_status($agent)
 {
     $status_events = get_all_queues_status(get_options());
     $match_event = NULL;
-
+    $status = 1;
+    
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
-        if ($event->getMemberName() == $extension) {
+        if ($event->getMemberName() == $agent) {
             $match_event = $event;
         }
     }
-
+    
     if ($match_event) {        
-        $status[AGENT_ANSWERED_CALLS] += $match_event->getCallsTaken();
         if($match_event->getPaused() == 1) {
-            $status[AGENT_STATE] = AGENT_PAUSED;
-        }
-        else if($match_event->getStatus() == 5 || $match_event->getStatus() == 2 || $match_event->getStatus() == 6){
-            $status[AGENT_STATE] = AGENT_BUSY;
-        }
-        else if ($match_event->getStatus() == 1) {
-            $status[AGENT_STATE] = AGENT_AVAILABLE;
+            $status = AGENT_PAUSED;
+        } else {
+            if($match_event->getStatus() == RAW_AGENT_UNAVAILABLE
+            || $match_event->getStatus() == RAW_AGENT_TALK
+            || $match_event->getStatus() == RAW_AGENT_RINGING){
+                $status = AGENT_BUSY;
+            }
+            else {
+                $status = intval($match_event->getStatus());
+            }
         }
     }
     else { 
-        $status[AGENT_ANSWERED_CALLS] = 0;
-        $status[AGENT_STATE] = AGENT_NOT_LOGIN;
+        $status = AGENT_NOT_LOGIN;
     }
     return $status;
 }
 
 function get_agent_status_string($a_queue, $exten)
 {
-   $contents = file_get_contents(EXT_STATUS_FILE);
-   $queues_array = explode("\n\n", $contents);
+    $SEMKEY = 1; 
+    $sem_id = sem_get($SEMKEY, 1);
+    
+    sem_acquire($sem_id);
 
-   foreach($queues_array as $queue) {
+    $contents = file_get_contents(QUEUES_STATUS_FILE) ;//or die("Failed to open file QUEUES_STATUS_FILE");
+    $queues_array = explode("\n\n", $contents);
 
-       $agents = explode("\n", $queue);
-       if (count($agents) == 1) continue;
+    foreach($queues_array as $queue) {
+        
+        $agents = explode("\n", $queue);
+        if (count($agents) == 1) continue;
+        
+        $queue_name = explode(' ',$agents[0])[0];
+        $queue_name = explode('=',$queue_name)[1];
+        
+        if ($queue_name != $a_queue) continue;       
+        
+        foreach($agents as $agent) {
+            $agent_status = explode(':', $agent);
+            if ($agent_status[0] != $exten) continue;
+            sem_release($sem_id);
 
-       $queue_name = explode(' ',$agents[0])[0];
-       $queue_name = explode('=',$queue_name)[1];
+            return $agent_status[1];
+        }
+    }
+    sem_release($sem_id);
 
-       if ($queue_name != $a_queue) continue;       
-
-       foreach($agents as $agent) {
-           $agent_status = explode(':', $agent);
-           if ($agent_status[0] != $exten) continue;
-
-           return $agent_status[1];
-       }
-   }
-
-   return NULL;
+    return NULL;
 }
 
 function parse_agent_status($status)
@@ -416,7 +433,6 @@ function get_agent_status($queue, $agent)
     }
 
     $status = get_agent_status_from_monitor($queue, $agent);
-    //$status = get_agent_status_from_queues($agent, $status);
 
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];

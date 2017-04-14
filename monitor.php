@@ -112,7 +112,7 @@ class Monitor implements IEventListener
     private $queues_vm = array();
     private $queues_status;
     private $queues_origin;
-    
+    private $sem_id;
     public function __construct()
     {
 
@@ -121,9 +121,16 @@ class Monitor implements IEventListener
 
         $this->queues_vm = get_queues_vm();
         foreach($this->queues_vm as $key => $vm) {
-            $this->queues_vm[$key] = 0;
-        }            
+            $this->queues_vm[$key] = 0;            
+        }
+
+        $SEMKEY = 1; 
+        $this->sem_id = sem_get($SEMKEY, 1);
+        
+        $this->save_status();
+
     }
+
     public function init_queues_origin()
     {
         $queues = get_all_queues();
@@ -151,7 +158,7 @@ class Monitor implements IEventListener
             foreach($agents_in_queue as $agent) {
                 $queues_status[$queue][$agent] = array();
                 $agent_status = &$queues_status[$queue][$agent];
-                $agent_status[AGENT_STATE] = RAW_AGENT_AVAILABLE;
+                $agent_status[AGENT_STATE] = get_agent_init_status($agent);
                 $agent_status[AGENT_STARTTIME] = time();
                 $agent_status[AGENT_STATE_DURATION] = 0;
                 $agent_status[AGENT_IN] = 0;
@@ -162,8 +169,6 @@ class Monitor implements IEventListener
                 $agent_status[AGENT_AVERAGE_TALK_TIME] = 0;
                 $agent_status[AGENT_UPTIME] = 0;
                 $agent_status[AGENT_UPCALLS] = 0;
-                if (!$this->if_agent_login_queue($agent))
-                    $agent_status = AGENT_NOT_LOGIN;
             }
             
         }
@@ -204,8 +209,15 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
-        $fd = fopen("ext.tmp", "w") or die("Failed to create file:");
-        $this->dump_all_queues($fd);        
+        sem_acquire($this->sem_id);
+
+        $fd = fopen(QUEUES_STATUS_FILE, "w") or die("Failed to create file:");
+        if (flock($fd, LOCK_EX)) {            
+            $this->dump_all_queues($fd);
+            flock($fd, LOCK_UN);
+        }
+
+        sem_release($this->sem_id);
     }
 
     public function get_event_ext($event)
@@ -315,7 +327,7 @@ class Monitor implements IEventListener
     public function count_voicemail($event)
     {
         $queues_vm = get_queues_vm();
-        $fd = fopen(QUEUE_STATUS_FILE, "w") or die("Failed to create file:");
+        $fd = fopen(QUEUE_VM_FILE, "w") or die("Failed to create file:");
 
         foreach($queues_vm as $key => $queue_vm) {
             $data = $event->getApplicationData();
@@ -350,47 +362,44 @@ class Monitor implements IEventListener
             return;
         }
 
-        if ($name == 'ExtensionStatus') {
-        }
-        else if ($name == 'AgentRingNoAnswer') {
+        if ($name == 'AgentRingNoAnswer') {
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$event->getMemberName()];
             $agent[AGENT_BOUNCED_CALLS] ++;                
-            $this->dump_all_queues(STDOUT);
         }
         else if ($name == 'AgentConnect') {
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$event->getMemberName()];
             $agent[AGENT_UPTIME] = time();
             $agent[AGENT_UPCALLS] ++;                
-            $this->dump_all_queues(STDOUT);
         }
         else if ($name == 'AgentComplete') {
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$event->getMemberName()];
             $this->computer_average_talktime($event, $event->getMemberName());
-            $this->dump_all_queues(STDOUT);
         }
         else if ($name == 'AgentCalled') {
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$event->getMemberName()];
             $agent[AGENT_IN] ++;
-            $this->dump_all_queues(STDOUT);
         }      
         else if ($name == 'QueueMemberStatus') {
             $this->handle_state_change($event,$ext);
-            $this->dump_all_queues(STDOUT);
         }
         else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
             } else if ($event->getApplication() == 'VoiceMail') {
                 $this->count_voicemail($event);
-            }            
+            } else {
+                return;
+            }
         } 
         else {
             return;
         }
+        
+        echo "$name\n";
         $this->save_status();
     }
 
@@ -412,7 +421,8 @@ ini_set('display_errors', 1);
 
 try
 {
-	$monitor = new ClientImpl(get_options());
+
+    $monitor = new ClientImpl(get_options());
 	$monitor->registerEventListener(new Monitor());
 	$monitor->open();
 
