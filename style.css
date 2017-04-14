@@ -1,0 +1,173 @@
+/*@charset "gb2312";*/
+/**
+ * 网站地址: http://www.qietu.com
+ * ----------------------------------------------------------------------------
+
+ html{-webkit-text-size-adjust:none; /*解决chrome浏览器下字体不能小于12px*/}
+ body{ color:#000000; font-family:Verdana, Arial, Helvetica, sans-serif;}
+ * {}
+a{outline:none; text-decoration:none;} a:hover{ text-decoration:underline;}
+html{zoom:1;}html *{outline:0;zoom:1;} html button::-moz-focus-inner{border-color:transparent!important;} 
+body{overflow-x: hidden; font-size:12px;} body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;} table{/*border-collapse:collapse;border-spacing:0;*/} fieldset,a img{border:0;} address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:normal;} li{list-style:none;} caption,th{text-align:left;} h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;} q:before,q:after{content:'';}
+input[type="submit"], input[type="reset"], input[type="button"],input[type="text"],input[type="password"],textarea, button { -webkit-appearance: none !important; /*去掉苹果的默认UI来渲染按钮*/} em,i{ font-style:normal;}
+
+
+html {
+	font-size:62.5%
+}
+@media only screen and (min-width:321px) { /*iphone5*/
+html {
+font-size:62.5%!important
+}
+}
+@media only screen and (min-width:361px) { /*三星note*/
+html {
+font-size:70.31%!important
+}
+}
+@media only screen and (min-width:376px) { /*iphone6*/
+html {
+font-size:73.24%!important
+}
+}
+@media only screen and (min-width:481px) {
+html {
+font-size:94%!important
+}
+}
+@media only screen and (min-width:561px) {
+html {
+font-size:109%!important
+}
+}
+@media only screen and (min-width:641px) {
+html {
+font-size:125%!important
+}
+}
+/**************************************/
+
+
+ body{font-family: "Microsoft YaHei",sans-serif;  background: #f6f6f6; line-height: 1.7; /*max-width: 64rem; min-width: 32rem; */margin: 0 auto; min-width: 320px; position: relative; }
+a{
+	color: #3a3a3a;
+}
+a:hover{
+	color: #ff9218; text-decoration: none;
+}
+.layout{
+	font-size: 0.625rem; position: relative; /*padding-bottom: 13rem;*/
+}
+
+/*文字超出隐藏*/
+.w_break{
+	word-break:keep-all;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+
+table.imagetable {
+    font-family: verdana,arial,sans-serif;
+    width:100%;
+	font-size:0.8rem;
+	color:#333333;
+	border-width: 1pxx;
+	border-color: #999999;
+	border-collapse: collapse;
+}
+table.imagetable th {
+	background:#b5cfd2 url('./images/cell-blue.jpg');
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable th.top {
+	background:#CCCCCC;
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.odd {
+	background:#FFFFFF;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.even {
+	background:#F9F9F9;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.blank {
+	background:#FFFFFF;
+	border-width: 1px;
+	padding: 10px;
+	border-style: solid;
+	border-color: #FFFFFF;
+}
+
+table.imagetable td.yellow{
+	background:#FFCC00;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+	
+table.imagetable td.red{
+	background:#C00000;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+table.imagetable td.green{
+	background:#92D050;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.yellowish{
+	background:#BF8F00;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.yellow{
+    background:#FFFF00;
+    border-width: 1px;
+    padding: 2px;
+    border-style: solid;
+    border-color: #999999;
+}
+
+table.imagetable td.black{
+	background:#040302;
+	color:#FFFFCC;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+table.imagetable td.pink{
+	background:#FF6666;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #999999;
+}
+
+
