@@ -15,22 +15,22 @@ input[type="submit"], input[type="reset"], input[type="button"],input[type="text
 html {
 	font-size:62.5%
 }
-@media only screen and (min-width:321px) { /*iphone5*/
+@media only screen and (min-width:640px) { /*iphone5*/
 html {
 font-size:62.5%!important
 }
 }
-@media only screen and (min-width:361px) { /*三星note*/
+@media only screen and (min-width:1024px) { /*三星note*/
 html {
-font-size:70.31%!important
+font-size:90.31%!important
 }
 }
-@media only screen and (min-width:376px) { /*iphone6*/
+@media only screen and (min-width:2048px) { /*iphone6*/
 html {
 font-size:73.24%!important
 }
 }
-@media only screen and (min-width:481px) {
+@media only screen and (min-width:3096px) {
 html {
 font-size:94%!important
 }
