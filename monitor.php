@@ -126,7 +126,7 @@ class Monitor implements IEventListener
         $this->sem_id = sem_get($SEMKEY, 1);
         
         $this->save_status();
-
+        $this->save_vm();
     }
 
     public function init_queues_origin()
@@ -322,18 +322,12 @@ class Monitor implements IEventListener
         }
     }
 
-    public function count_voicemail($event)
+    private function save_vm()
     {
         $queues_vm = get_queues_vm();
         $fd = fopen(QUEUE_VM_FILE, "w") or die("Failed to create file:");
 
         foreach($queues_vm as $key => $queue_vm) {
-            $data = $event->getApplicationData();
-            $vm = explode('@', $data)[0];
-            if ($queue_vm == $vm) {
-                $this->queues_vm["$key"] ++;
-            }
-
             $count = $this->queues_vm["$key"];
             fwrite($fd, "$key:");
             fwrite($fd, "$count");
@@ -341,6 +335,21 @@ class Monitor implements IEventListener
         }
 
         fclose($fd);
+    }
+
+    public function count_voicemail($event)
+    {
+        $queues_vm = get_queues_vm();
+        foreach($queues_vm as $key => $queue_vm) {
+            $data = $event->getApplicationData();
+            $vm = explode('@', $data)[0];
+            if ($queue_vm == $vm) {
+                $this->queues_vm["$key"] ++;
+            }
+
+        }
+
+        $this->save_vm();
     }
 
     public function possible_transfer($event)
