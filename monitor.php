@@ -101,9 +101,7 @@ define("EXT_STATUS_HOLD", 16);
 
 function get_queues_vm()
 {
-    $queues_vm['6000'] = '4001';
-    $queues_vm['6001'] = '4002';
-
+    $queues_vm = get_vm_options();
     return $queues_vm;
 }
 

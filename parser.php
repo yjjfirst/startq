@@ -250,6 +250,11 @@ class parser
         return $this->ini_array['asterisk'];
     }
     //////////////////////////////////////////////////////////////////////////////////
+
+    public function get_vm_options()
+    {
+        return $this->ini_array['vm'];
+    }
 }
 //print_r (parser::get_instance()->ini_array);
 ?>
