@@ -75,7 +75,7 @@ $agents=$agent_table->get_array_objs();
             }
             if($td_color != 'unset')
             {
-                $td_class=sprintf("class=\"%s\"",$td_color);
+                $td_class=sprintf("style=\"background:%s\"",$parser->get_color_codes($td_color));
             }
             else
             {

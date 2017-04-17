@@ -93,7 +93,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
             $td_color=$group_table->get_color_by_range($_index,$item);
             if($td_color != 'unset')
             {
-                $td_class=sprintf("class=\"%s\"",$td_color);
+                $td_class=sprintf("style=\"background:%s\"",$parser->get_color_codes($td_color));
             }
             else
             {
