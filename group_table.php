@@ -83,7 +83,6 @@ for($i=0;$i<count($groups);next($groups),$i++)
         if($group_longest < $queue[GROUP_LONGEST] )
         {
             $group_longest = $queue[GROUP_LONGEST];
-            printf("%s\n",$group_longest);
         }
 
         $queue = $group_table->secs_to_strtime($queue);
