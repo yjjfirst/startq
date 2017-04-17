@@ -1,5 +1,7 @@
 {
     "require": {
-        "marcelog/pami": "2.*"
+        "marcelog/pami": "2.*",
+	"dowling/cron-expression": "*"
+
     }
 }
