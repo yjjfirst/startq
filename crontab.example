@@ -1,0 +1,4 @@
+#hourly
+
+01 *    * * *   root    cd /opt/lampp/htdocs/starq && ./restart.sh
+
