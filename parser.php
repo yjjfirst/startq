@@ -234,15 +234,11 @@ class parser
 
         $ret_str = 'UNKNOWN';
 
-        if(!is_numeric($index))
+        if(!is_numeric($index)|| is_null($state_str[$index]))
         {
             return $ret_str;
         }
-        else if($index >= AGENT_AVAILABLE && $index <= AGENT_PAUSED)
-        {
-            return $state_str[$index];
-        }
-        return $ret_str;
+        return $state_str[$index];
     }
     ///////////////////////////////////////////////////////////////////////////////////
     public function get_asterisk_options()
