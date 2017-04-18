@@ -231,7 +231,16 @@ class xtable
         {
             if(!in_array($agent_name, $conf_agents))
             {
-                $this->array_objs[$agent_name]=array_values(get_agent_status(NULL, $agent_name));
+                $agent_belongs = agent_belongs($agent_name);
+                if(count($agent_belongs) > 0)
+                {
+                    $this->array_objs["$agent_belongs[0]-$agent_name"]=
+                        array_values(get_agent_status($agent_belongs[0], $agent_name));
+                }
+                else
+                {
+                    $this->array_objs[$agent_name]=array_values(get_agent_status(NULL, $agent_name));
+                }
             }
         }
     }
