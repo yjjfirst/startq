@@ -48,12 +48,14 @@ for($i=0;$i<count($groups);next($groups),$i++)
     $queues = current($groups);
     $rows = 0;
     $td_class = "class=\"odd\"";
+    if($group_name != 'Others')
+    {
 ?>
             <tr>
             <td><?php echo $group_name?></td>
             </tr>
 <?php
-
+    }
     for($k=0;$k<count($queues);$k++,next($queues))
     {
         $rows++;
@@ -119,15 +121,19 @@ for($i=0;$i<count($groups);next($groups),$i++)
     {
         $td_class="class=\"odd\"";
     }
+    if($group_name != 'Others')
+    {
+
 ?>
                 <tr>
                 <td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
 <?php
-    foreach($total_items as $item)
-    {
+        foreach($total_items as $item)
+        {
 ?>
                     <td <?php echo $td_class?>><?php echo $item?></td>
 <?php
+        }
     }
 ?>
                 </tr>
