@@ -275,9 +275,15 @@ function get_queue_status($name)
         if ($queue_name != $name) continue;
 
         if (isset($origins[1])) {
-            $in = explode('=',$origins[1])[1];
-            $answered = explode('=',$origins[2])[1];
-            $abandoned = explode('=',$origins[3])[1];
+
+            $ins = explode('=',$origins[1]);
+            $in = $ins[1];
+
+            $answereds = explode('=',$origins[2]);
+            $answered = $answereds[1];
+            
+            $abandoneds = explode('=',$origins[3]); 
+            $abandoned = $abandoneds[1];
             
             $status['inbound_calls'] -= $in;
             $status['answered_calls'] -= $answered;
@@ -382,8 +388,9 @@ function get_agent_status_string($a_queue, $exten)
         $agents = explode("\n", $queue);
         if (count($agents) == 1) continue;
         
-        $queue_name = explode(' ',$agents[0])[0];
-        $queue_name = explode('=',$queue_name)[1];
+        $queue_line = explode(' ',$agents[0]);
+	$queue_pair = explode('=',$queue_line[0]);  
+        $queue_name =$queue_pair[1];
         
         if ($queue_name != $a_queue) continue;       
         

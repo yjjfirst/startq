@@ -225,7 +225,9 @@ class Monitor implements IEventListener
         
         if ($name == 'Newstate') {
             $channel = $event->getChannel();
-            $ext = explode('-', explode('/', $channel)[1])[0];
+            $channel_vars = explode('/', $channel);
+            $ext_vars = explode('-', $channel_vars);
+            $ext = $ext_vars[0];
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
         } else if ($name == 'QueueMemberStatus') {
@@ -237,9 +239,13 @@ class Monitor implements IEventListener
 
     private function get_ext_from_channel($channel)
     {
-        if (Empty(trim($channel))) return NULL;
+        $channel_var = trim($channel);
+        if (empty($channel_var)) 
+            return NULL;
 
-        $ext = explode('-', explode('/', $channel)[1])[0];
+        $channel_vars = explode('/', $channel);
+        $ext_vars = explode('-', $channel_vars);
+        $ext = $ext_vars[0];
 
         return $ext;
     }
@@ -342,7 +348,8 @@ class Monitor implements IEventListener
         $queues_vm = get_queues_vm();
         foreach($queues_vm as $key => $queue_vm) {
             $data = $event->getApplicationData();
-            $vm = explode('@', $data)[0];
+            $vms = explode('@', $data);
+            $vm = $vms[0];
             if ($queue_vm == $vm) {
                 $this->queues_vm["$key"] ++;
             }
