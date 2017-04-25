@@ -226,7 +226,7 @@ class Monitor implements IEventListener
         if ($name == 'Newstate') {
             $channel = $event->getChannel();
             $channel_vars = explode('/', $channel);
-            $ext_vars = explode('-', $channel_vars);
+            $ext_vars = explode('-', $channel_vars[1]);
             $ext = $ext_vars[0];
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
