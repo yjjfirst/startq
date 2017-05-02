@@ -2,7 +2,7 @@
 require_once ('debugging_data.php');
 require_once ('parser.php');
 include_once ('queues.php');
-
+date_default_timezone_set('America/Vancouver');
 class xtable
 {
     public  $column_names;
@@ -112,7 +112,6 @@ class xtable
         {
             $this->array_objs=$table_objs;
         }
-
         foreach($this->array_objs as $key=>$value)
         {
             $new_row=array();
@@ -220,13 +219,13 @@ class xtable
 
         $all_agents = get_all_agents();
         $conf_agents = array();
-
+        if(!is_null($agents))
         foreach($agents as $agent_name=>$attrs)
         {
             sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
             $conf_agents[] = $user_name;       
         }
-
+     
         foreach($all_agents as $agent_name)
         {
             if(!in_array($agent_name, $conf_agents))
@@ -239,7 +238,8 @@ class xtable
                 }
                 else
                 {
-                    $this->array_objs[$agent_name]=array_values(get_agent_status(NULL, $agent_name));
+                  if(!is_null(get_agent_status(NULL,$agent_name)))  
+                  $this->array_objs[$agent_name]=array_values(get_agent_status(NULL, $agent_name));
                 }
             }
         }

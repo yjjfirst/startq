@@ -161,7 +161,7 @@ function get_all_agents()
     $agents = $a->send(new SIPPeersAction());
     $events = $agents->getEvents();
     $agent_names = array();
-    
+   
     foreach($events as $event) {
         if ($event->getName() != 'PeerEntry') continue;       
 
@@ -481,4 +481,3 @@ function get_agents_status_total($agent)
     return $total_status;
 }
 
-get_agent_status("6000", "4002");

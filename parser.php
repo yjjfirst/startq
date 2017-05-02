@@ -143,6 +143,7 @@ class parser
     //////////////////////////////////////////////////////////////////////////////////////////////////
     private function parse_to_agentobj(&$data_source)
     {	
+	$new_row = null;
         foreach($data_source as $agent=>$queues)
         {
             $queue_row = explode(",",$queues);

@@ -5,14 +5,15 @@ include_once './xtable.php';
 /////////////////////////////////////////////
 $parser = parser::get_instance();
 $agent_table = new xtable();
-
 $agent_table->set_init_values($parser->get_agent_init_values());
 $agent_table->set_time_items($parser->get_agent_time_items());
 $agent_table->set_column_names($parser->get_agent_cloumn_names());
+if(!is_null($parser->get_agents_objs())){
 $agent_table->set_array_objs($parser->get_agents_objs());
-$agent_table->set_color_objs($parser->get_agent_state_colors());
 $agent_table->agent_default_values();
 $agent_table->agent_retrive_from_asterisk();
+}
+$agent_table->set_color_objs($parser->get_agent_state_colors());
 $agent_table->agent_retrive_rest_agents();
 /////////////////////////////////////////////
 $agents=$agent_table->get_array_objs();
