@@ -118,6 +118,7 @@ define ("AGENT_AVERAGE_TALK_TIME", 'average');
 
 define ("QUEUES_STATUS_FILE", 'queues.tmp');
 define ("QUEUE_VM_FILE", 'vm.tmp');
+define ("LONGEST_WAIT_FILE", "longest_hole_time.tmp");
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -297,6 +298,53 @@ function get_queue_status($name)
     return $status;
 }
 
+
+function get_longest_wait_time($queue)
+{
+    if (file_exists(LONGEST_WAIT_FILE)) {
+        $contents = file_get_contents(LONGEST_WAIT_FILE);
+        $lines = explode("\n", $contents);
+        
+        foreach ($lines as $line) {
+            if ($line == "") continue;
+            $longest = explode(":",$line);
+            $longest_times[$longest[0]] = $longest[1];
+        }
+    }
+    return $longest_times[$queue];
+}
+
+function update_longest_time($queue, $time)
+{ 
+    if (file_exists(LONGEST_WAIT_FILE)) {
+        $contents = file_get_contents(LONGEST_WAIT_FILE);
+        $lines = explode("\n", $contents);
+        $longest_times = array();
+        
+        foreach ($lines as $line) {
+            if ($line == "") continue;
+            $longest = explode(":",$line);
+            $longest_times[$longest[0]] = $longest[1];
+        }
+
+        if (empty($longest_times[$queue]) || $longest_times[$queue] < $time )
+            $longest_times[$queue] = $time;
+
+        $fd = @fopen(LONGEST_WAIT_FILE, "w");
+
+        if ($fd) {
+            foreach($longest_times as $queue => $t) {
+                fwrite($fd, "$queue:$t\n");
+            }
+            fclose($fd);
+        }
+    } else {
+        $fd = fopen(LONGEST_WAIT_FILE , "w");
+        fwrite($fd, "$queue:$time\n");
+        fclose($fd);
+    }
+}
+
 function internal_get_queue_status($name)
 {
     if (!queue_exist($name)) return NULL;
@@ -314,8 +362,9 @@ function internal_get_queue_status($name)
             if ($queue_summary->getQueue() == $name) break;
     }
 
+    update_longest_time($name, $queue_summary->getLongestHoldTime());
     $status['call_in_queue'] = $queue_params->getCalls();
-    $status['longest_waiting_time'] = $queue_summary->getLongestHoldTime();
+    $status['longest_waiting_time'] = get_longest_wait_time($name);
     $status['agent_available'] = $queue_summary->getAvailable();
     $status['inbound_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
     $status['answered_calls'] = $queue_params->getCompleted();

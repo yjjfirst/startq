@@ -127,6 +127,8 @@ class Monitor implements IEventListener
         
         $this->save_status();
         $this->save_vm();
+
+        unlink("longest_hole_time.tmp");
     }
 
     public function init_queues_origin()
