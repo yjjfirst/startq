@@ -146,7 +146,7 @@ function agent_belongs($ext)
     $events = get_all_queues_status(get_options());
     foreach($events as $event) {
         if ($event->getName() != 'QueueMember') continue;
-        if ($event->getMemberName() == $ext)
+        if (get_agent_extension($event) == $ext)
             $queues[] = $event->getQueue();
     }
 
@@ -175,6 +175,15 @@ function get_all_agents()
     return $agent_names;        
 }
 
+function get_agent_extension($event)
+{
+    $location = explode("/", $event->getLocation());
+    $from = explode("@", $location[1]);
+    $ext = $from[0];
+
+    return $ext;
+}
+
 function get_all_agents_in_queue($queue)
 {
     $status_events = get_all_queues_status(get_options());
@@ -182,7 +191,7 @@ function get_all_agents_in_queue($queue)
     
     foreach($status_events as $event) {
         if ($event->getName() == 'QueueMember' && $event->getQueue() == $queue) {
-            $agents[] = $event->getMemberName();
+            $agents[] = get_agent_extension($event);
         }
     }
 
@@ -381,7 +390,7 @@ function agent_in_queue($queue, $agent)
 
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
-        if ($event->getQueue() == $queue && $event->getMemberName() == $agent)  {
+        if ($event->getQueue() == $queue && get_agent_extension($event) == $agent)  {
             return TRUE;
         }
     }
@@ -397,7 +406,7 @@ function get_agent_init_status($agent)
     
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
-        if ($event->getMemberName() == $agent) {
+        if (get_agent_extension($event) == $agent) {
             $match_event = $event;
         }
     }

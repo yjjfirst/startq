@@ -233,7 +233,7 @@ class Monitor implements IEventListener
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
         } else if ($name == 'QueueMemberStatus') {
-            $ext = $event->getMemberName();
+            $ext = get_agent_extension($event);
         }
 
         return $ext;
@@ -380,27 +380,27 @@ class Monitor implements IEventListener
 
         if ($name == 'AgentRingNoAnswer') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
             $agent[AGENT_BOUNCED_CALLS] ++;                
         }
         else if ($name == 'AgentConnect') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
             $agent[AGENT_UPTIME] = time();
             $agent[AGENT_UPCALLS] ++;                
         }
         else if ($name == 'AgentComplete') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
-            $this->computer_average_talktime($event, $event->getMemberName());
+            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
+            $this->computer_average_talktime($event, get_agent_extension($event));
         }
         else if ($name == 'AgentCalled') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
             $agent[AGENT_IN] ++;
         }      
         else if ($name == 'QueueMemberStatus') {
-            $this->handle_state_change($event,$ext);
+            $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
@@ -425,7 +425,7 @@ class Monitor implements IEventListener
         
         foreach($status_events as $event) {
             if ($event->getName() != 'QueueMember') continue;
-            if ($event->getMemberName() == $extension)
+            if (get_agent_extension($event) == $extension)
                 return TRUE;
         }        
         return FALSE;

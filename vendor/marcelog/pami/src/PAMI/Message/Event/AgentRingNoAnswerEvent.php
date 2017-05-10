@@ -64,6 +64,11 @@ class AgentRingNoAnswerEvent extends EventMessage
     {
         return $this->getKey('MemberName');	
     }
+
+    public function getLocation()
+    {
+        return $this->getKey('Member');
+    }
     /**
      * Returns key: 'UniqueID'.
      *

@@ -64,6 +64,11 @@ class AgentCalledEvent extends EventMessage
     {
         return $this->getKey('AgentName');	
     }
+
+    public function getLocation() 
+    {
+        return $this->getKey('AgentCalled');
+    }
     /**
      * Returns key: 'UniqueID'.
      *
