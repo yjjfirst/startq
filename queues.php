@@ -494,7 +494,6 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
-    echo $agent, "\n";
     $status = array();
 
     if ($queue == NULL) {
