@@ -177,7 +177,11 @@ function get_all_agents()
 
 function get_agent_extension($event)
 {
-    $location = explode("/", $event->getLocation());
+    if ($event->getName() == "QueueMemberStatus")
+        $location = explode("/", $event->getInterface());
+    else
+        $location = explode("/", $event->getLocation());
+
     $from = explode("@", $location[1]);
     $ext = $from[0];
 
@@ -502,7 +506,9 @@ function get_agent_status($queue, $agent)
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
   out:
-    if ($status[AGENT_STATE] == RAW_AGENT_RINGING || $status[AGENT_STATE] == RAW_AGENT_TALK)
+    if ($status[AGENT_STATE] == RAW_AGENT_RINGING
+    || $status[AGENT_STATE] == RAW_AGENT_TALK
+    || $status[AGENT_STATE] == RAW_AGENT_UNAVAILABLE)
         $status[AGENT_STATE] = AGENT_BUSY;
     return $status;
 }

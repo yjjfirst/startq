@@ -75,6 +75,10 @@ class QueueMemberStatusEvent extends EventMessage
         return $this->getKey('Location');
     }
 
+    public function getInterface()
+    {
+        return $this->getKey('Interface');
+    }
     /**
      * Returns key: 'MemberName'.
      *

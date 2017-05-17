@@ -209,6 +209,8 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
+        $this->dump_all_queues(STDOUT); 
+        
         sem_acquire($this->sem_id);
 
         $fd = fopen(QUEUES_STATUS_FILE, "w") or die("Failed to create file:");
@@ -365,41 +367,40 @@ class Monitor implements IEventListener
     {
         return strstr($event->getApplicationData(), 'Blind Transfer');
     }
-        
+
     public function handle(EventMessage $event)
     {
         $name = $event->getName();
         $ext = $this->get_event_ext($event);
         
-        /* if (strstr ($name, "Queue") || strstr($name, "Agent")) */
-        /*     var_dump($event); */
+        if (strstr ($name, "Queue") || strstr($name, "Agent")) 
+            echo "$name ";
         
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
 
-        if ($name == 'AgentRingNoAnswer') {
+        if ($name == 'QueueMemberStatus') {
+            echo $event->getStatus();
+            echo "\n";
+
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][get_agent_extension($event)];
-            $agent[AGENT_BOUNCED_CALLS] ++;                
-        }
-        else if ($name == 'AgentConnect') {
-            $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
-            $agent[AGENT_UPTIME] = time();
-            $agent[AGENT_UPCALLS] ++;                
-        }
-        else if ($name == 'AgentComplete') {
-            $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
-            $this->computer_average_talktime($event, get_agent_extension($event));
-        }
-        else if ($name == 'AgentCalled') {
-            $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
-            $agent[AGENT_IN] ++;
-        }      
-        else if ($name == 'QueueMemberStatus') {
+
+            if ($event->getStatus() == RAW_AGENT_RINGING){
+                $agent[AGENT_IN] ++;
+            }
+            else if ($event->getStatus() == RAW_AGENT_AVAILABLE) {
+                if ($agent[AGENT_STATE] == RAW_AGENT_RINGING) {
+                    $agent[AGENT_BOUNCED_CALLS] ++;
+                } else if ($agent[AGENT_STATE] == RAW_AGENT_TALK) {
+                    $this->computer_average_talktime($event, get_agent_extension($event)); 
+                }                
+            }
+            else if ($event->getStatus() == RAW_AGENT_TALK) {
+                $agent[AGENT_UPTIME] = time();
+                $agent[AGENT_UPCALLS] ++;                
+            } 
             $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {
@@ -415,7 +416,6 @@ class Monitor implements IEventListener
             return;
         }
         
-        echo "$name\n";
         $this->save_status();
     }
 

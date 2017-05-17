@@ -200,7 +200,7 @@ class xtable
             sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
             if(!in_array($_id,$all_queues_name))
             {
-                unset($this->array_objs[$agent][$agent_name]);
+                //unset($this->array_objs[$agent][$agent_name]);
                 continue;
             }
             $agent_belongs = agent_belongs($user_name);

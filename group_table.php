@@ -18,8 +18,6 @@ $group_table->group_retrive_rest_queues();
 $groups=$group_table->get_array_objs();
 define("GROUP_LONGEST",'1');
 define ("GROUP_AVERAGE",'5');
-$group_longest = 0;
-$group_average = 0;
 ?>
 <!-- Table goes in the document BODY -->
         <table class="imagetable">
@@ -37,6 +35,9 @@ foreach($group_table->column_names as $title)
 <?php
 for($i=0;$i<count($groups);next($groups),$i++)
 {
+    $group_longest = 0;
+    $group_average = 0;
+
     //print_r($groups
     $group_name = key($groups);
     if(count($groups[$group_name]) == 0)
