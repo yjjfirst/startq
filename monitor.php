@@ -214,7 +214,7 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
-        $this->dump_all_queues(STDOUT); 
+        //$this->dump_all_queues(STDOUT); 
         
         sem_acquire($this->sem_id);
 
@@ -379,20 +379,16 @@ class Monitor implements IEventListener
         $ext = $this->get_event_ext($event);
         
         if (strstr ($name, "Queue") || strstr($name, "Agent")) 
-            echo "$name ";
+            echo "$name\n";
         
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
 
         if ($name == 'QueueMemberAdded') {
-            var_dump($ext);
             $this->queues_status[$event->getQueue()][$ext] = array();
             $this->init_agent($this->queues_status[$event->getQueue()][$ext], $ext);
         } else if ($name == 'QueueMemberStatus') {
-            echo $event->getStatus();
-            echo "\n";
-
             $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][get_agent_extension($event)];
 
