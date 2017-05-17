@@ -62,7 +62,7 @@ class AgentCalledEvent extends EventMessage
 
     public function getMemberName()
     {
-        return $this->getKey('AgentName');	
+        return $this->getKey('MemberName');	
     }
 
     public function getLocation() 

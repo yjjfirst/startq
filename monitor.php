@@ -182,6 +182,7 @@ class Monitor implements IEventListener
 
     public function dump_all_queues($fd)
     {
+        echo "*******************************************************************\n";
         $queues = get_all_queues();
         foreach($queues as $queue) {
             $this->dump_one_queue($queue, $fd);
@@ -214,7 +215,7 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
-        //$this->dump_all_queues(STDOUT); 
+        $this->dump_all_queues(STDOUT); 
         
         sem_acquire($this->sem_id);
 
@@ -301,9 +302,6 @@ class Monitor implements IEventListener
                 $agent[AGENT_STARTTIME] = time();
                 $agent[AGENT_OUT] ++;
             }
-            else if ( $agent[AGENT_STATE] == RAW_AGENT_RINGING) { 
-                $agent[AGENT_ANSWERED_CALLS] ++;
-            }
         }
         else {
             $agent[AGENT_STARTTIME] = time();
@@ -384,28 +382,40 @@ class Monitor implements IEventListener
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
+        if ($name == 'AgentRingNoAnswer') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent[AGENT_BOUNCED_CALLS] ++;                
+        }
+        else if ($name == 'AgentConnect') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
 
-        if ($name == 'QueueMemberAdded') {
+            $agent[AGENT_UPTIME] = time();
+            $agent[AGENT_UPCALLS] ++;                
+
+            $agent[AGENT_ANSWERED_CALLS] ++;            
+        }
+        else if ($name == 'AgentComplete') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $this->computer_average_talktime($event, $event->getMemberName());
+        } else if ($name == 'AgentCalled') {
+            $queue = $event->getQueue();
+            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent[AGENT_IN] ++;
+        } else if ($name == 'QueueMemberAdded') {
             $this->queues_status[$event->getQueue()][$ext] = array();
             $this->init_agent($this->queues_status[$event->getQueue()][$ext], $ext);
         } else if ($name == 'QueueMemberStatus') {
-            $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][get_agent_extension($event)];
+            /* $queue = $event->getQueue(); */
+            /* $agent = &$this->queues_status[$queue][get_agent_extension($event)]; */
 
-            if ($event->getStatus() == RAW_AGENT_RINGING){
-                $agent[AGENT_IN] ++;
-            }
-            else if ($event->getStatus() == RAW_AGENT_AVAILABLE) {
-                if ($agent[AGENT_STATE] == RAW_AGENT_RINGING) {
-                    $agent[AGENT_BOUNCED_CALLS] ++;
-                } else if ($agent[AGENT_STATE] == RAW_AGENT_TALK) {
-                    $this->computer_average_talktime($event, get_agent_extension($event)); 
-                }                
-            }
-            else if ($event->getStatus() == RAW_AGENT_TALK) {
-                $agent[AGENT_UPTIME] = time();
-                $agent[AGENT_UPCALLS] ++;                
-            } 
+            /* if ($event->getStatus() == RAW_AGENT_AVAILABLE) { */
+            /*     if ($agent[AGENT_STATE] == RAW_AGENT_TALK) { */
+            /*         $this->computer_average_talktime($event, get_agent_extension($event));  */
+            /*     }                 */
+            /* } */
             $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {
