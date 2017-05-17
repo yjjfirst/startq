@@ -408,14 +408,6 @@ class Monitor implements IEventListener
             $this->queues_status[$event->getQueue()][$ext] = array();
             $this->init_agent($this->queues_status[$event->getQueue()][$ext], $ext);
         } else if ($name == 'QueueMemberStatus') {
-            /* $queue = $event->getQueue(); */
-            /* $agent = &$this->queues_status[$queue][get_agent_extension($event)]; */
-
-            /* if ($event->getStatus() == RAW_AGENT_AVAILABLE) { */
-            /*     if ($agent[AGENT_STATE] == RAW_AGENT_TALK) { */
-            /*         $this->computer_average_talktime($event, get_agent_extension($event));  */
-            /*     }                 */
-            /* } */
             $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {
