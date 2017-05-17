@@ -177,7 +177,7 @@ function get_all_agents()
 
 function get_agent_extension($event)
 {
-    if ($event->getName() == "QueueMemberStatus")
+    if ($event->getName() == "QueueMemberStatus" || $event->getName() == 'QueueMemberAdded')
         $location = explode("/", $event->getInterface());
     else
         $location = explode("/", $event->getLocation());
@@ -451,7 +451,7 @@ function get_agent_status_string($a_queue, $exten)
         if (count($agents) == 1) continue;
         
         $queue_line = explode(' ',$agents[0]);
-	$queue_pair = explode('=',$queue_line[0]);  
+        $queue_pair = explode('=',$queue_line[0]);  
         $queue_name =$queue_pair[1];
         
         if ($queue_name != $a_queue) continue;       
@@ -494,6 +494,7 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
+    echo $agent, "\n";
     $status = array();
 
     if ($queue == NULL) {
@@ -502,7 +503,7 @@ function get_agent_status($queue, $agent)
     }
 
     $status = get_agent_status_from_monitor($queue, $agent);
-
+    
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
   out:
