@@ -65,6 +65,11 @@ class AgentRingNoAnswerEvent extends EventMessage
         return $this->getKey('MemberName');	
     }
 
+    public function getInterface()
+    {
+        return $this->getKey('Interface');
+    }
+
     public function getLocation()
     {
         return $this->getKey('Member');

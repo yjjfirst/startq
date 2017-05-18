@@ -182,7 +182,7 @@ class Monitor implements IEventListener
 
     public function dump_all_queues($fd)
     {
-        echo "*******************************************************************\n";
+        //echo "*******************************************************************\n";
         $queues = get_all_queues();
         foreach($queues as $queue) {
             $this->dump_one_queue($queue, $fd);
@@ -215,7 +215,7 @@ class Monitor implements IEventListener
 
     public function save_status()
     {
-        $this->dump_all_queues(STDOUT); 
+        //$this->dump_all_queues(STDOUT); 
         
         sem_acquire($this->sem_id);
 
@@ -240,7 +240,9 @@ class Monitor implements IEventListener
             $ext = $ext_vars[0];
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
-        } else if ($name == 'QueueMemberStatus' || $name == 'QueueMemberAdded') {
+        } else if (strstr($event->getName(), "MemberStatus")) {
+            $ext = get_agent_extension($event);
+        } else if (strstr($event->getName(), "Agent")) {
             $ext = get_agent_extension($event);
         }
 
@@ -382,40 +384,41 @@ class Monitor implements IEventListener
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
+
         if ($name == 'AgentRingNoAnswer') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][$ext];
             $agent[AGENT_BOUNCED_CALLS] ++;                
         }
         else if ($name == 'AgentConnect') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][$ext];
 
             $agent[AGENT_UPTIME] = time();
             $agent[AGENT_UPCALLS] ++;                
 
             $agent[AGENT_ANSWERED_CALLS] ++;            
-        }
-        else if ($name == 'AgentComplete') {
+        } else if ($name == 'AgentComplete') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
-            $this->computer_average_talktime($event, $event->getMemberName());
+            $agent = &$this->queues_status[$queue][$ext];
+            $this->computer_average_talktime($event, $ext);
         } else if ($name == 'AgentCalled') {
             $queue = $event->getQueue();
-            $agent = &$this->queues_status[$queue][$event->getMemberName()];
+            $agent = &$this->queues_status[$queue][$ext];
             $agent[AGENT_IN] ++;
         } else if ($name == 'QueueMemberAdded') {
             $this->queues_status[$event->getQueue()][$ext] = array();
             $this->init_agent($this->queues_status[$event->getQueue()][$ext], $ext);
         } else if ($name == 'QueueMemberStatus') {
             $this->handle_state_change($event, $ext);
-        }
-        else if ($name == 'Newexten') {
+        } else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
-            } else if ($event->getApplication() == 'VoiceMail') {
+            }
+            else if ($event->getApplication() == 'VoiceMail') {
                 $this->count_voicemail($event);
-            } else {
+            }
+            else {
                 return;
             }
         } 

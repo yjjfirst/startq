@@ -177,8 +177,12 @@ function get_all_agents()
 
 function get_agent_extension($event)
 {
-    if ($event->getName() == "QueueMemberStatus" || $event->getName() == 'QueueMemberAdded')
+    if (strstr($event->getName(), "MemberStatus") ) {
         $location = explode("/", $event->getInterface());
+    }
+    else if (strstr($event->getName(), "Agent")) {
+        $location = explode("/", $event->getInterface());        
+    }
     else
         $location = explode("/", $event->getLocation());
 
@@ -497,6 +501,7 @@ function get_agent_status($queue, $agent)
     $status = array();
 
     if ($queue == NULL) {
+        echo "test", $queue, $agent, "<br>";
         $status = get_agents_status_total($agent);
         goto out;
     }

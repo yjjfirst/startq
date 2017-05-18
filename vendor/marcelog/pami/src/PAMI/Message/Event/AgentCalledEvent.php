@@ -69,6 +69,12 @@ class AgentCalledEvent extends EventMessage
     {
         return $this->getKey('AgentCalled');
     }
+
+    public function getInterface()
+    {
+        return $this->getKey('Interface');
+    }
+
     /**
      * Returns key: 'UniqueID'.
      *

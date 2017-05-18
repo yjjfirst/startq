@@ -70,6 +70,11 @@ class AgentCompleteEvent extends EventMessage
         return $this->getKey('Member');	
     }
  
+    public function getInterface()
+    {
+        return $this->getKey('Interface');
+    }
+
     /**
      * Returns key: 'UniqueID'.
      *
