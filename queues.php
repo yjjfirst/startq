@@ -501,7 +501,6 @@ function get_agent_status($queue, $agent)
     $status = array();
 
     if ($queue == NULL) {
-        echo "test", $queue, $agent, "<br>";
         $status = get_agents_status_total($agent);
         goto out;
     }

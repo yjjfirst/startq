@@ -225,7 +225,7 @@ class xtable
             sscanf($agent_name, "%[^-]-%[^-]",$_id, $user_name);
             $conf_agents[] = $user_name;       
         }
-     
+
         foreach($all_agents as $agent_name)
         {
             if(!in_array($agent_name, $conf_agents))
@@ -234,7 +234,7 @@ class xtable
                 if(count($agent_belongs) > 0)
                 {
                     $this->array_objs["$agent_belongs[0]-$agent_name"]=
-                        array_values(get_agent_status($agent_belongs[0], $agent_name));
+                        array_values(get_agent_status(NULL, $agent_name));
                 }
                 else
                 {
