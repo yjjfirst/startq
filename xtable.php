@@ -250,17 +250,13 @@ class xtable
         $ret_color = 'unset';	
         $colors = $this->color_objs;
 
-        if(!empty($_value) && !is_integer($_value))
-        {
-            return $ret_color;
-        }
-
         foreach($colors as $_index=>$color_array)
         {
-            if($_index != $_cloumn_index)
+            if($_index - 2 != $_cloumn_index)
             {
                 continue;
             }
+            
             foreach($color_array as $_color=>$_range_array)
             {
                 if($_value>=$_range_array[0] && $_value <= $_range_array[1])

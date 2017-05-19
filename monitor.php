@@ -445,19 +445,17 @@ class Monitor implements IEventListener
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-try
-{
+$monitor = new ClientImpl(get_options());
+$monitor->registerEventListener(new Monitor());
+$monitor->open();
 
-    $monitor = new ClientImpl(get_options());
-	$monitor->registerEventListener(new Monitor());
-	$monitor->open();
-
-	$time = time();
-	while(true){
-        usleep(1000);
-	    $monitor->process();
-	}
-	$monitor->close(); 
-} catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+$time = time();
+while(true){
+    usleep(100000);
+    try {
+        $monitor->process();
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
+$monitor->close(); 
