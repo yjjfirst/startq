@@ -447,15 +447,15 @@ ini_set('display_errors', 1);
 
 $monitor = new ClientImpl(get_options());
 $monitor->registerEventListener(new Monitor());
-$monitor->open();
 
 $time = time();
 while(true){
-    usleep(100000);
+    $monitor->open();
+    usleep(200000);
     try {
         $monitor->process();
     } catch (Exception $e) {
         echo $e->getMessage() . "\n";
     }
+    $monitor->close(); 
 }
-$monitor->close(); 
