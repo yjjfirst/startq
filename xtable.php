@@ -72,6 +72,14 @@ class xtable
         return $ret;
     }
 
+    public function convert_format($col, $value)
+    {
+        if (in_array($col, $this->time_items))
+            return $this->_time_strformat($value);
+
+        return $value;
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     public function secs_to_strtime(&$rows_to_adjust)
     {

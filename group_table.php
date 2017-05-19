@@ -38,7 +38,6 @@ for($i=0;$i<count($groups);next($groups),$i++)
     $group_longest = 0;
     $group_average = 0;
 
-    //print_r($groups
     $group_name = key($groups);
     if(count($groups[$group_name]) == 0)
     {
@@ -88,7 +87,6 @@ for($i=0;$i<count($groups);next($groups),$i++)
             $group_longest = $queue[GROUP_LONGEST];
         }
 
-        $queue = $group_table->secs_to_strtime($queue);
         $td_class_org = $td_class;
         foreach($queue as $_index=>$item)
         {
@@ -101,8 +99,8 @@ for($i=0;$i<count($groups);next($groups),$i++)
             {
                 $td_class = $td_class_org;
             }
-            ?>
-            <td <?php echo $td_class?>><?php echo $item?></td>
+?>
+            <td <?php echo $td_class?>><?php echo $group_table->convert_format($_index, $item)?></td>
 <?php
         }
 ?>
@@ -111,7 +109,6 @@ for($i=0;$i<count($groups);next($groups),$i++)
     }
     $total_items[GROUP_LONGEST] = $group_longest;
     $total_items[GROUP_AVERAGE] = round((int)$total_items[GROUP_AVERAGE]/$rows);
-    $total_items = $group_table->secs_to_strtime($total_items);
 
     $rows++;
     if($rows%2 == 0)
@@ -142,7 +139,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
             }
 
 ?>
-            <td <?php echo $td_class?>><?php echo $item?></td>
+            <td <?php echo $td_class?>><?php echo $group_table->convert_format($_index, $item)?></td>
 <?php
         }
     }

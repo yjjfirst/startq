@@ -289,7 +289,8 @@ class ClientImpl implements IClient
                 $bMsg .= 'ActionId: ' . $this->lastActionId . "\r\n" . $aMsg;
                 $event = $this->messageToEvent($bMsg);
                 $response = $this->findResponse($event);
-                $response->addEvent($event);
+                if ($response)
+                    $response->addEvent($event);
             }
             $this->logger->debug('----------------');
         }
