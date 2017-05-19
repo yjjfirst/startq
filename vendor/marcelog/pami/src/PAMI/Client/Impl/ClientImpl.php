@@ -185,11 +185,11 @@ class ClientImpl implements IClient
             );
         }
         $response = $this->send($msg);
-        if (!$response->isSuccess()) {
+        //if (!$response->isSuccess()) {
             //throw new ClientException(
             //    'Could not connect: ' . $response->getMessage()
             //);
-        }
+        //}
         @stream_set_blocking($this->socket, 0);
         $this->currentProcessingMessage = '';
         $this->logger->debug('Logged in successfully to ami.');
@@ -239,7 +239,7 @@ class ClientImpl implements IClient
         // Read something.
         $read = @fread($this->socket, 65535);
         if ($read === false || @feof($this->socket)) {
-            echo "\n\nError reading\n\n";
+            echo "Error reading\n";
         }
         $this->currentProcessingMessage .= $read;
         // If we have a complete message, then return it. Save the rest for

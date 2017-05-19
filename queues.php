@@ -512,7 +512,8 @@ function get_agent_status($queue, $agent)
   out:
     if ($status[AGENT_STATE] == RAW_AGENT_RINGING
     || $status[AGENT_STATE] == RAW_AGENT_TALK
-    || $status[AGENT_STATE] == RAW_AGENT_UNAVAILABLE)
+    || $status[AGENT_STATE] == RAW_AGENT_UNAVAILABLE
+    || $status[AGENT_STATE] == 4)
         $status[AGENT_STATE] = AGENT_BUSY;
     return $status;
 }
