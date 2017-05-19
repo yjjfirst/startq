@@ -252,7 +252,7 @@ class xtable
 
         foreach($colors as $_index=>$color_array)
         {
-            if($_index - 2 != $_cloumn_index)
+            if($_index != $_cloumn_index)
             {
                 continue;
             }

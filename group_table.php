@@ -20,18 +20,18 @@ define("GROUP_LONGEST",'1');
 define ("GROUP_AVERAGE",'5');
 ?>
 <!-- Table goes in the document BODY -->
-        <table class="imagetable">
-            <tr>
-                <th><?php echo ''?></th>
+    <table class="imagetable">
+    <tr>
+    <th><?php echo ''?></th>
 <?php
 foreach($group_table->column_names as $title)
 {
 ?>
-                <th><?php echo $title?></th>
+<th><?php echo $title?></th>
 <?php
 }
 ?>
-            </tr>
+</tr>
 <?php
 for($i=0;$i<count($groups);next($groups),$i++)
 {
@@ -70,8 +70,8 @@ for($i=0;$i<count($groups);next($groups),$i++)
             $td_class="class=\"odd\"";
         }
 ?>
-                    <tr>
-                        <td <?php echo $td_class?>><?php echo $queue_name?></td>
+        <tr>
+        <td <?php echo $td_class?>><?php echo $queue_name?></td>
 <?php
         $queue=$queues["$queue_name"];
         for($j=0;$j<count($queue);$j++)
@@ -92,7 +92,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
         $td_class_org = $td_class;
         foreach($queue as $_index=>$item)
         {
-            $td_color=$group_table->get_color_by_range($_index,$item);
+            $td_color=$group_table->get_color_by_range($_index+2, $item);
             if($td_color != 'unset')
             {
                 $td_class=sprintf("style=\"background:%s\"",$parser->get_color_codes($td_color));
@@ -102,11 +102,11 @@ for($i=0;$i<count($groups);next($groups),$i++)
                 $td_class = $td_class_org;
             }
             ?>
-                            <td <?php echo $td_class?>><?php echo $item?></td>
+            <td <?php echo $td_class?>><?php echo $item?></td>
 <?php
         }
 ?>
-                    </tr>
+        </tr>
 <?php
     }
     $total_items[GROUP_LONGEST] = $group_longest;
@@ -124,21 +124,31 @@ for($i=0;$i<count($groups);next($groups),$i++)
     }
     if($group_name != 'Others')
     {
+?>
+        <tr>
+        <td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
+<?php
+        foreach($total_items as $_index=>$item)
+        {
+            $td_color=$group_table->get_color_by_range($_index+2, $item);
+
+            if($td_color != 'unset')
+            {
+                $td_class=sprintf("style=\"background:%s\"",$parser->get_color_codes($td_color));
+            }
+            else
+            {
+                $td_class = $td_class_org;
+            }
 
 ?>
-                <tr>
-                <td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
-<?php
-        foreach($total_items as $item)
-        {
-?>
-                    <td <?php echo $td_class?>><?php echo $item?></td>
+            <td <?php echo $td_class?>><?php echo $item?></td>
 <?php
         }
     }
 ?>
-                </tr>
+    </tr>
 <?php
 }
 ?>
-        </table>
+</table>

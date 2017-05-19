@@ -72,7 +72,7 @@ $agents=$agent_table->get_array_objs();
             else 
             {
                 $agent_table->set_color_objs($parser->get_agent_column_colors());                
-                $td_color=$agent_table->get_color_by_range($_index,$item);
+                $td_color=$agent_table->get_color_by_range($_index + 2,$item);
             }
             if($td_color != 'unset')
             {
