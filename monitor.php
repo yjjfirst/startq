@@ -133,6 +133,7 @@ class QueueAverage
     private $average;
     private $counts;
     private $queue;
+    private $max;
 
     public function __construct($average, $counts, $queue)
     {
@@ -148,6 +149,9 @@ class QueueAverage
 
         $this->counts += 1;
         $this->average = intval($total/$this->counts);
+
+        if ($caller->get_duration() > $this->max)
+            $this->max = $caller->get_duration();
     }
 
     public function save($fd)

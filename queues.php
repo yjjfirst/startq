@@ -362,6 +362,20 @@ function update_longest_time($queue, $time)
     }
 }
 
+function get_average_hold_time($queue)
+{
+    if (file_exists(QUEUES_AVERAGE_FILE)) {
+        $contents = file_get_contents(QUEUES_AVERAGE_FILE);
+        $queues_average = explode("\n", $contents);
+        foreach($queues_average as $average) {
+            $item = explode(":", $average);
+            if ($item[0] == $queue) return $item[1];
+        }
+    }
+
+    return 0;
+}
+
 function internal_get_queue_status($name)
 {
     if (!queue_exist($name)) return NULL;
@@ -385,7 +399,7 @@ function internal_get_queue_status($name)
     $status['agent_available'] = $queue_summary->getAvailable();
     $status['inbound_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
     $status['answered_calls'] = $queue_params->getCompleted();
-    $status['average_waiting_time'] = $queue_params->getHoldtime();
+    $status['average_waiting_time'] = get_average_hold_time($name);
     $status['abandoned_calls'] = $queue_params->getAbandoned();
     $status['transferred_vm'] = get_vm_from_monitor($name);
 
