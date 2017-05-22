@@ -118,8 +118,8 @@ define ("AGENT_AVERAGE_TALK_TIME", 'average');
 
 define ("QUEUES_STATUS_FILE", 'queues.tmp');
 define ("QUEUE_VM_FILE", 'vm.tmp');
-define ("LONGEST_WAIT_FILE", "longest_hole_time.tmp");
-
+define ("LONGEST_WAIT_FILE", "longest_hold_time.tmp");
+define ("QUEUES_AVERAGE_FILE", 'queues_average.tmp');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 

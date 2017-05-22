@@ -99,10 +99,66 @@ define("EXT_STATUS_IDLE", 0);
 define("EXT_STATUS_CALLING", 1);
 define("EXT_STATUS_HOLD", 16);
 
-function get_queues_vm()
+class QueueCaller
 {
-    $queues_vm = get_vm_options();
-    return $queues_vm;
+    private $start_time;
+    private $end_time;
+    private $queue;
+
+    public function __construct($start, $queue)
+    {
+        $this->start_time = $start;
+        $this->queue = $queue;
+    }
+
+    public function set_end_time($time)
+    {
+        $this->end_time = $time;
+    }
+
+    public function get_queue()
+    {
+        return $this->queue;
+    }
+
+    public function get_duration()
+    {    
+
+        return $this->end_time - $this->start_time;
+    }
+}
+
+class QueueAverage
+{
+    private $average;
+    private $counts;
+    private $queue;
+
+    public function __construct($average, $counts, $queue)
+    {
+        $this->average = $average;
+        $this->counts = $counts;
+        $this->queue = $queue;
+    }
+
+    public function add_call($caller)
+    {
+        $privious = $this->average * $this->counts;
+        $total = $privious + $caller->get_duration();
+
+        $this->counts += 1;
+        $this->average = intval($total/$this->counts);
+    }
+
+    public function save($fd)
+    {
+        fwrite($fd, "$this->queue:$this->average\n");
+    }
+
+    public function get_queue()
+    {
+        return $this->queue;
+    }
 }
 
 class Monitor implements IEventListener
@@ -110,14 +166,25 @@ class Monitor implements IEventListener
     private $queues_vm = array();
     private $queues_status;
     private $queues_origin;
+    private $callers;
+    private $queues_average;
+    
     private $sem_id;
+
+    function get_queues_vm()
+    {
+        $queues_vm = get_vm_options();
+        return $queues_vm;
+    }
+    
     public function __construct()
     {
 
         $this->queues_status = $this->init_queues_status();
         $this->queues_origin = $this->init_queues_origin();
+        $this->init_queues_average();
 
-        $this->queues_vm = get_queues_vm();
+        $this->queues_vm = $this->get_queues_vm();
         foreach($this->queues_vm as $key => $vm) {
             $this->queues_vm[$key] = 0;            
         }
@@ -127,8 +194,18 @@ class Monitor implements IEventListener
         
         $this->save_status();
         $this->save_vm();
+        $this->save_average();
+        
+        unlink(LONGEST_WAIT_FILE);
+    }
 
-        unlink("longest_hole_time.tmp");
+    public function init_queues_average()
+    {
+        $queues = get_all_queues();
+        foreach ($queues as $queue) {
+            $this->queues_average[$queue] =
+                new QueueAverage(0, 0, $queue);
+        }
     }
 
     public function init_queues_origin()
@@ -262,6 +339,15 @@ class Monitor implements IEventListener
         return $ext;
     }
 
+    public function cal_average($caller)
+    {
+        foreach($this->queues_average as &$average) {
+            if ($average->get_queue() != $caller->get_queue()) continue;
+
+            $average->add_call($caller);            
+        }
+    }
+    
     public function inc_transfered_call($ext)
     {
         $queues = get_all_queues();
@@ -339,7 +425,7 @@ class Monitor implements IEventListener
 
     private function save_vm()
     {
-        $queues_vm = get_queues_vm();
+        $queues_vm = $this->get_queues_vm();
         $fd = fopen(QUEUE_VM_FILE, "w") or die("Failed to create file:");
 
         foreach($queues_vm as $key => $queue_vm) {
@@ -352,6 +438,15 @@ class Monitor implements IEventListener
         fclose($fd);
     }
 
+    private function save_average()
+    {
+        $fd = fopen(QUEUES_AVERAGE_FILE, "w");
+        
+        foreach($this->queues_average as $average) {
+            $average->save($fd);
+        }
+    }
+    
     public function count_voicemail($event)
     {
         $queues_vm = get_queues_vm();
@@ -377,41 +472,56 @@ class Monitor implements IEventListener
     {
         $name = $event->getName();
         $ext = $this->get_event_ext($event);
+        $queue;
         
-        if (strstr ($name, "Queue") || strstr($name, "Agent")) 
+        if (strstr ($name, "Queue") || strstr($name, "Agent")) {
+            $queue = $event->getQueue();
             echo "$name\n";
+        }
         
         if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
             return;
         }
 
         if ($name == 'AgentRingNoAnswer') {
-            $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$ext];
             $agent[AGENT_BOUNCED_CALLS] ++;                
         }
         else if ($name == 'AgentConnect') {
-            $queue = $event->getQueue();
             $agent = &$this->queues_status[$queue][$ext];
 
             $agent[AGENT_UPTIME] = time();
             $agent[AGENT_UPCALLS] ++;                
-
             $agent[AGENT_ANSWERED_CALLS] ++;            
-        } else if ($name == 'AgentComplete') {
-            $queue = $event->getQueue();
+        }
+        else if ($name == 'AgentComplete') {
             $agent = &$this->queues_status[$queue][$ext];
             $this->computer_average_talktime($event, $ext);
-        } else if ($name == 'AgentCalled') {
-            $queue = $event->getQueue();
+        }
+        else if ($name == 'AgentCalled') {
             $agent = &$this->queues_status[$queue][$ext];
             $agent[AGENT_IN] ++;
-        } else if ($name == 'QueueMemberAdded') {
-            $this->queues_status[$event->getQueue()][$ext] = array();
-            $this->init_agent($this->queues_status[$event->getQueue()][$ext], $ext);
-        } else if ($name == 'QueueMemberStatus') {
+        }
+        else if ($name == "QueueCallerJoin") {
+            $caller = new QueueCaller(time(),$queue);
+            $this->callers[$event->getUniqueId()] = $caller;
+        }
+        else if ($name == "QueueCallerLeave") {
+            $caller = $this->callers[$event->getUniqueId()];
+            if (!empty($caller)) {
+                $caller->set_end_time(time());
+                $this->cal_average($caller);
+                $this->save_average();
+            }
+        }
+        else if ($name == 'QueueMemberAdded') {
+            $this->queues_status[$queue][$ext] = array();
+            $this->init_agent($this->queues_status[$queue][$ext], $ext);
+        }
+        else if ($name == 'QueueMemberStatus') {
             $this->handle_state_change($event, $ext);
-        } else if ($name == 'Newexten') {
+        }
+        else if ($name == 'Newexten') {
             if ($this->possible_transfer($event)) {
                 $this->count_transfered_call($event);
             }
