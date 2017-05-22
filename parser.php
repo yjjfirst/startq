@@ -224,6 +224,11 @@ class parser
         return $this->ini_array['vm'];
     }
 
+    public function get_agent_name_options()
+    {
+        return $this->ini_array['agent-name'];
+    }
+    
     public function get_color_codes($color)
     {
         return $this->ini_array['color-codes'][$color];

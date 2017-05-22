@@ -50,7 +50,7 @@ $agents=$agent_table->get_array_objs();
             continue;
         }
 
-        $agent_name=$agent_table->get_agent_queue_name($rows-1,$item_name);
+        $agent_name = $agent_table->get_agent_queue_name($rows-1,$item_name);
 ?>
                 <tr>
                     <td <?php echo $td_class?>><?php echo $agent_name?></td>

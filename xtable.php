@@ -8,6 +8,11 @@ class xtable
     public  $column_names;
     private $init_values,$time_items,$array_objs,$color_objs; 
 
+    public function __construct()
+    {
+        $this->parser = parser::get_instance(); 
+    }
+
     private function _init_row_data(&$_init_rows)
     {
         for($i=0;$i<count($this->init_values);$i++)
@@ -309,16 +314,27 @@ class xtable
         return $ret_color;
     }
 
+    public function get_agent_real_name($agent)
+    {
+        $agent_real_names = $this->parser->get_agent_name_options();
+        foreach($agent_real_names as $key=>$name) {
+            if ($key == $agent) return $name; 
+        }
+
+        return $agent;
+    }
+
     public function get_agent_queue_name($row,$queue_str)
     {
         $agent_queue = $queue_str;
         static $agent=null;
 
         sscanf($queue_str, "%[^-]-%[^-]",$queue_id, $new_agent);
-        //printf("agent= %s, new_agnet= %s\n",$agent, $new_agent);
+
+        $agent_queue = sprintf("%s-%s", $queue_id, $this->get_agent_real_name($new_agent));
 
         if(is_null($new_agent))
-        {
+        { 
             return $agent_queue;
         }
 
