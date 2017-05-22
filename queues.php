@@ -399,7 +399,11 @@ function internal_get_queue_status($name)
     $status['agent_available'] = $queue_summary->getAvailable();
     $status['inbound_calls'] = $queue_params->getCompleted() + $queue_params->getAbandoned();
     $status['answered_calls'] = $queue_params->getCompleted();
-    $status['average_waiting_time'] = get_average_hold_time($name);
+
+    $status['average_waiting_time'] = get_average_hold_time($name);    
+    if ($status['average_waiting_time'] > $status['longest_waiting_time'])
+        $status['average_waiting_time'] = $status['longest_waiting_time'];
+    
     $status['abandoned_calls'] = $queue_params->getAbandoned();
     $status['transferred_vm'] = get_vm_from_monitor($name);
 
