@@ -565,7 +565,7 @@ $monitor->registerEventListener(new Monitor());
 $time = time();
 while(true){
     $monitor->open();
-    usleep(200000);
+    usleep(20000);
     try {
         $monitor->process();
     } catch (Exception $e) {

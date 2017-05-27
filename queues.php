@@ -235,7 +235,7 @@ function get_all_queues()
     $status_events = get_all_queues_status(get_options());
 
     foreach($status_events as $event) {
-        if ($event->getName() == 'QueueParams') {
+        if ($event->getName() == 'QueueParams' && $event->getQueue() != 'default') {
             $queues[] = $event->getQueue();
         }
     }
