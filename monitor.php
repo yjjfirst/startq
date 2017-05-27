@@ -453,7 +453,7 @@ class Monitor implements IEventListener
     
     public function count_voicemail($event)
     {
-        $queues_vm = get_queues_vm();
+        $queues_vm = $this->get_queues_vm();
         foreach($queues_vm as $key => $queue_vm) {
             $data = $event->getApplicationData();
             $vms = explode('@', $data);
