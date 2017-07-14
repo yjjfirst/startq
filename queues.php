@@ -198,9 +198,16 @@ function get_all_agents_in_queue($queue)
     $agents = array();
     
     foreach($status_events as $event) {
-        if ($event->getName() == 'QueueMember' && $event->getQueue() == $queue) {
-            $agents[] = get_agent_extension($event);
-        }
+        if ($event->getName() != 'QueueMember') continue;
+	if ($event->getQueue() != $queue) continue;
+
+	$ext = get_agent_extension($event);
+	$exts = get_all_agents();
+	
+	if (!in_array($ext, $exts)) continue;
+	
+        $agents[] = $ext;
+        
     }
 
     return $agents;
