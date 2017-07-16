@@ -3,6 +3,7 @@ require_once ('debugging_data.php');
 require_once ('parser.php');
 include_once ('queues.php');
 date_default_timezone_set('America/Vancouver');
+error_reporting(E_ERROR | E_PARSE);
 class xtable
 {
     public  $column_names;
@@ -194,6 +195,7 @@ class xtable
        $all_queues_asterisk = get_all_queues();
        foreach($all_queues_asterisk as $queue_name) 
        {
+           //if (!empty($all_queues_in_config))
            if(!in_array($queue_name,$all_queues_in_config)) 
            {
                $this->array_objs["Others"][$queue_name]=array_values(get_queue_status($queue_name)); 

@@ -229,17 +229,7 @@ class Monitor implements IEventListener
 
     public function init_agent(&$agent_status, $agent)
     {
-        $agent_status[AGENT_STATE] = get_agent_init_status($agent);
-        $agent_status[AGENT_STARTTIME] = time();
-        $agent_status[AGENT_STATE_DURATION] = 0;
-        $agent_status[AGENT_IN] = 0;
-        $agent_status[AGENT_OUT] = 0;
-        $agent_status[AGENT_ANSWERED_CALLS] = 0;
-        $agent_status[AGENT_BOUNCED_CALLS] = 0;
-        $agent_status[AGENT_TRANSFERED_CALLS] = 0;
-        $agent_status[AGENT_AVERAGE_TALK_TIME] = 0;
-        $agent_status[AGENT_UPTIME] = 0;
-        $agent_status[AGENT_UPCALLS] = 0;
+        init_agent_status($agent_status, get_agent_init_status($agent));
     }
 
     public function init_queues_status()

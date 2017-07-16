@@ -94,6 +94,7 @@ use PAMI\Message\Action\DongleSendPDUAction;
 define("RAW_AGENT_AVAILABLE", 1);
 define("RAW_AGENT_RINGING", 6);
 define("RAW_AGENT_TALK", 2);
+define("RAW_AGENT_INVALID", 4);
 define("RAW_AGENT_UNAVAILABLE", 5);
 define("RAW_AGENT_HOLD", 8);
 define("RAW_AGENT_PAUSED", 100);
@@ -431,6 +432,24 @@ function agent_in_queue($queue, $agent)
     return FALSE;
 }
 
+
+
+function convert_raw_status($raw)
+{
+    $raw_to_real = array (
+       RAW_AGENT_AVAILABLE => AGENT_AVAILABLE,
+       RAW_AGENT_RINGING => AGENT_BUSY,
+       RAW_AGENT_TALK => AGENT_BUSY,
+       RAW_AGENT_INVALID => AGENT_NOT_LOGIN,
+       RAW_AGENT_UNAVAILABLE => AGENT_NOT_LOGIN,
+       RAW_AGENT_HOLD => AGENT_HOLD,
+       RAW_AGENT_PAUSED => AGENT_PAUSED,
+   
+    );
+
+    return $raw_to_real[$raw];
+} 
+
 function get_agent_init_status($agent)
 {
     $status_events = get_all_queues_status(get_options());
@@ -448,19 +467,13 @@ function get_agent_init_status($agent)
         if($match_event->getPaused() == 1) {
             $status = AGENT_PAUSED;
         } else {
-            if($match_event->getStatus() == RAW_AGENT_UNAVAILABLE
-            || $match_event->getStatus() == RAW_AGENT_TALK
-            || $match_event->getStatus() == RAW_AGENT_RINGING){
-                $status = AGENT_BUSY;
-            }
-            else {
-                $status = intval($match_event->getStatus());
-            }
+            $status = convert_raw_status($match_event->getStatus());
         }
     }
     else { 
         $status = AGENT_NOT_LOGIN;
     }
+
     return $status;
 }
 
@@ -514,6 +527,21 @@ function parse_agent_status($status)
     return $result;
 }
 
+function init_agent_status(&$status, $state) 
+{
+    $status[AGENT_STATE] = $state;
+    $status[AGENT_STARTTIME] = time();
+    $status[AGENT_STATE_DURATION] = 0;
+    $status[AGENT_IN] = 0;
+    $status[AGENT_OUT] = 0;
+    $status[AGENT_ANSWERED_CALLS] = 0;
+    $status[AGENT_BOUNCED_CALLS] = 0;
+    $status[AGENT_TRANSFERED_CALLS] = 0;
+    $status[AGENT_AVERAGE_TALK_TIME] = 0;
+    $status[AGENT_UPTIME] = 0;
+    $status[AGENT_UPCALLS] = 0;
+}
+
 function get_agent_status_from_monitor($queue, $agent)
 {
     $string = get_agent_status_string($queue, $agent);
@@ -523,8 +551,6 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
-    $status = array();
-
     if ($queue == NULL) {
         $status = get_agents_status_total($agent);
         goto out;
@@ -534,19 +560,19 @@ function get_agent_status($queue, $agent)
     
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
-  out:
-    if ($status[AGENT_STATE] == RAW_AGENT_RINGING
-    || $status[AGENT_STATE] == RAW_AGENT_TALK
-    || $status[AGENT_STATE] == RAW_AGENT_UNAVAILABLE
-    || $status[AGENT_STATE] == 4)
-        $status[AGENT_STATE] = AGENT_BUSY;
+out:
+
+    if ($status != NULL) {
+        $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
+    }
+
     return $status;
 }
 
 function get_agents_status_total($agent)
 {
     $queues = get_all_queues();
-    $total_status = NULL;;
+    $total_status = NULL;
     
     foreach($queues as $queue) {
         if (!agent_in_queue($queue, $agent)) continue;
