@@ -240,7 +240,7 @@ class Monitor implements IEventListener
                 
         foreach($queues as $queue) {
             $queue_status[$queue]  = array();
-            $agents_in_queue = get_all_agents_in_queue($queue);
+            $agents_in_queue = get_all_agents_in_queue($queue); 
             foreach($agents_in_queue as $agent) {
                 $queues_status[$queue][$agent] = array();
                 $agent_status = &$queues_status[$queue][$agent];
@@ -312,6 +312,8 @@ class Monitor implements IEventListener
         } else if ($name == 'ExtensionStatus') {
             $ext = $event->getExtension();
         } else if (strstr($event->getName(), "MemberStatus")) {
+            $ext = get_agent_extension($event);
+        } else if (strstr($event->getName(), "QueueMemberAdded")) {
             $ext = get_agent_extension($event);
         } else if (strstr($event->getName(), "Agent")) {
             $ext = get_agent_extension($event);
@@ -395,7 +397,7 @@ class Monitor implements IEventListener
         }
         
         if ($agent[AGENT_STATE] != $event->getStatus()) {
-            $agent[AGENT_STATE] = $event->getStatus();
+            $agent[AGENT_STATE] = convert_raw_status($event->getStatus());
         }
     }
 

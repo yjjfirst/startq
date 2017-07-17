@@ -140,6 +140,7 @@ function is_agent($ext, $a)
     return false;
 }
 
+
 function agent_belongs($ext)
 {
     $queues = array();
@@ -181,6 +182,9 @@ function get_agent_extension($event)
     if (strstr($event->getName(), "MemberStatus") ) {
         $location = explode("/", $event->getInterface());
     }
+    else if (strstr($event->getName(), "QueueMemberAdded")) {
+        $location = explode("/", $event->getInterface());        
+    }
     else if (strstr($event->getName(), "Agent")) {
         $location = explode("/", $event->getInterface());        
     }
@@ -197,15 +201,15 @@ function get_all_agents_in_queue($queue)
 {
     $status_events = get_all_queues_status(get_options());
     $agents = array();
-    
+    $all_exts = get_all_agents();
+   
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
 	if ($event->getQueue() != $queue) continue;
 
 	$ext = get_agent_extension($event);
-	$exts = get_all_agents();
 	
-	if (!in_array($ext, $exts)) continue;
+	if (!in_array($ext, $all_exts)) continue;
 	
         $agents[] = $ext;
         
@@ -470,7 +474,7 @@ function get_agent_init_status($agent)
             $status = convert_raw_status($match_event->getStatus());
         }
     }
-    else { 
+    else {
         $status = AGENT_NOT_LOGIN;
     }
 
@@ -562,10 +566,11 @@ function get_agent_status($queue, $agent)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 out:
 
-    if ($status != NULL) {
-        $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
-    }
-
+    //var_dump($status);
+    //if ($status != NULL) {
+    //    $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
+    //    echo $status[AGENT_STATE];
+    //} 
     return $status;
 }
 
