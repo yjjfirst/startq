@@ -515,6 +515,9 @@ class Monitor implements IEventListener
             $this->init_agent($this->queues_status[$queue][$ext], $ext);
         }
         else if ($name == 'QueueMemberStatus') {
+            if (!isset($this->queues_status[$queue][$ext])) {
+                $this->init_agent($this->queues_status[$queue][$ext], $ext);
+            }
             $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {
