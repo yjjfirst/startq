@@ -240,7 +240,7 @@ class Monitor implements IEventListener
                 
         foreach($queues as $queue) {
             $queue_status[$queue]  = array();
-            $agents_in_queue = get_all_agents_in_queue($queue); 
+            $agents_in_queue = get_all_agents(); 
             foreach($agents_in_queue as $agent) {
                 $queues_status[$queue][$agent] = array();
                 $agent_status = &$queues_status[$queue][$agent];
@@ -315,6 +315,9 @@ class Monitor implements IEventListener
             $ext = get_agent_extension($event);
         } else if (strstr($event->getName(), "QueueMemberAdded")) {
             $ext = get_agent_extension($event);
+        } else if (strstr($event->getName(), "QueueMemberRemoved")) {
+            $ext = get_agent_extension($event);
+
         } else if (strstr($event->getName(), "Agent")) {
             $ext = get_agent_extension($event);
         }
@@ -381,7 +384,7 @@ class Monitor implements IEventListener
         $queue = $event->getQueue();
         $agent = &$this->queues_status[$queue][$ext];
 
-        if ($event->getStatus() == RAW_AGENT_TALK) {
+        if ($event->getName() != "QueueMemberRemoved" && $event->getStatus() == RAW_AGENT_TALK) {
             if ($agent[AGENT_STATE] == RAW_AGENT_AVAILABLE){
                 $agent[AGENT_STARTTIME] = time();
                 $agent[AGENT_OUT] ++;
@@ -391,12 +394,15 @@ class Monitor implements IEventListener
             $agent[AGENT_STARTTIME] = time();
         }
 
-        if ($event->getPause() == 1) {
+        if ($event->getName() != "QueueMemberRemoved" && $event->getPause() == 1) {
             $agent[AGENT_STATE] = RAW_AGENT_PAUSED;
             return;
         }
         
-        if ($agent[AGENT_STATE] != $event->getStatus()) {
+        if ($event->getName() == "QueueMemberRemoved" ) {
+            $agent[AGENT_STATE] = AGENT_NOT_LOGIN;
+        }
+        else if ($agent[AGENT_STATE] != $event->getStatus()) {
             $agent[AGENT_STATE] = convert_raw_status($event->getStatus());
         }
     }
@@ -474,10 +480,11 @@ class Monitor implements IEventListener
             $queue = $event->getQueue();
             echo "$name\n";
         }
-        
-        if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
-            return;
-        }
+       
+         
+        //if (!empty($ext) && !$this->if_agent_login_queue($ext)) {
+        //    return;
+        //}
 
         if ($name == 'AgentRingNoAnswer') {
             $agent = &$this->queues_status[$queue][$ext];
@@ -518,6 +525,9 @@ class Monitor implements IEventListener
             if (!isset($this->queues_status[$queue][$ext])) {
                 $this->init_agent($this->queues_status[$queue][$ext], $ext);
             }
+            $this->handle_state_change($event, $ext);
+        } 
+        else if ($name == 'QueueMemberRemoved') {
             $this->handle_state_change($event, $ext);
         }
         else if ($name == 'Newexten') {

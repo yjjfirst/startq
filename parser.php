@@ -134,7 +134,7 @@ class parser
     {
         $this->agent_objs = $this->ini_array["agents"];	
         $this->parse_to_agentobj($this->agent_objs);  
-
+        
         return $this->agent_objs;
     }
     ///////////////////////////////////////////////////////////////////////////////////	

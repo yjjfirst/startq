@@ -65,6 +65,11 @@ class QueueMemberRemovedEvent extends EventMessage
         return $this->getKey('Queue');
     }
 
+    public function getInterface()
+    {
+        return $this->getKey('Interface');
+    }
+
     /**
      * Returns key: 'Location'.
      *

@@ -185,6 +185,9 @@ function get_agent_extension($event)
     else if (strstr($event->getName(), "QueueMemberAdded")) {
         $location = explode("/", $event->getInterface());        
     }
+    else if (strstr($event->getName(), "QueueMemberRemoved")) {
+        $location = explode("/", $event->getInterface());        
+    }
     else if (strstr($event->getName(), "Agent")) {
         $location = explode("/", $event->getInterface());        
     }
