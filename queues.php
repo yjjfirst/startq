@@ -473,13 +473,13 @@ function get_agent_init_status($agent, $queue)
     
     if ($match_event) {        
         if($match_event->getPaused() == 1) {
-            $status = AGENT_PAUSED;
+            $status = RAW_AGENT_PAUSED;
         } else {
-            $status = convert_raw_status($match_event->getStatus());
+            $status = $match_event->getStatus();
         }
     }
     else {
-        $status = AGENT_NOT_LOGIN;
+        $status = RAW_AGENT_UNAVAILABLE;
     }
 
     return $status;
@@ -569,12 +569,9 @@ function get_agent_status($queue, $agent)
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 out:
-
-    //var_dump($status);
-    //if ($status != NULL) {
-    //    $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
-    //    echo $status[AGENT_STATE];
-    //} 
+    if ($status != NULL) {
+        $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
+    } 
     return $status;
 }
 
