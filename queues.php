@@ -457,7 +457,7 @@ function convert_raw_status($raw)
     return $raw_to_real[$raw];
 } 
 
-function get_agent_init_status($agent)
+function get_agent_init_status($agent, $queue)
 {
     $status_events = get_all_queues_status(get_options());
     $match_event = NULL;
@@ -465,6 +465,7 @@ function get_agent_init_status($agent)
     
     foreach($status_events as $event) {
         if ($event->getName() != 'QueueMember') continue;
+        if ($event->getQueue() != $queue) continue;
         if (get_agent_extension($event) == $agent) {
             $match_event = $event;
         }

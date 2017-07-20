@@ -227,9 +227,9 @@ class Monitor implements IEventListener
         return $queues_origin;
     }
 
-    public function init_agent(&$agent_status, $agent)
+    public function init_agent(&$agent_status, $agent, $queue)
     {
-        init_agent_status($agent_status, get_agent_init_status($agent));
+        init_agent_status($agent_status, get_agent_init_status($agent, $queue));
     }
 
     public function init_queues_status()
@@ -244,7 +244,7 @@ class Monitor implements IEventListener
             foreach($agents_in_queue as $agent) {
                 $queues_status[$queue][$agent] = array();
                 $agent_status = &$queues_status[$queue][$agent];
-                $this->init_agent($agent_status, $agent);
+                $this->init_agent($agent_status, $agent, $queue);
             }
             
         }
@@ -519,11 +519,11 @@ class Monitor implements IEventListener
         }
         else if ($name == 'QueueMemberAdded') {
             $this->queues_status[$queue][$ext] = array();
-            $this->init_agent($this->queues_status[$queue][$ext], $ext);
+            $this->init_agent($this->queues_status[$queue][$ext], $ext, $queue);
         }
         else if ($name == 'QueueMemberStatus') {
             if (!isset($this->queues_status[$queue][$ext])) {
-                $this->init_agent($this->queues_status[$queue][$ext], $ext);
+                $this->init_agent($this->queues_status[$queue][$ext], $ext, $queue);
             }
             $this->handle_state_change($event, $ext);
         } 
