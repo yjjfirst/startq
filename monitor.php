@@ -383,16 +383,7 @@ class Monitor implements IEventListener
     {
         $queue = $event->getQueue();
         $agent = &$this->queues_status[$queue][$ext];
-
-        if ($event->getName() != "QueueMemberRemoved" && $event->getStatus() == RAW_AGENT_TALK) {
-            if ($agent[AGENT_STATE] == RAW_AGENT_AVAILABLE){
-                $agent[AGENT_STARTTIME] = time();
-                $agent[AGENT_OUT] ++;
-            }
-        }
-        else {
-            $agent[AGENT_STARTTIME] = time();
-        }
+        $agent[AGENT_STARTTIME] = time();
 
         if ($event->getName() != "QueueMemberRemoved" && $event->getPause() == 1) {
             $agent[AGENT_STATE] = RAW_AGENT_PAUSED;
@@ -407,7 +398,7 @@ class Monitor implements IEventListener
         }
     }
 
-    public function computer_average_talktime($event, $ext)
+    public function cal_average_talktime($event, $ext)
     {
         $queue = $event->getQueue();
         $agent = &$this->queues_status[$queue][$ext];
@@ -422,6 +413,27 @@ class Monitor implements IEventListener
 
             $agent[AGENT_UPTIME] = 0;
             $agent[AGENT_AVERAGE_TALK_TIME] = (int)$average;
+        }
+    }
+
+    public function cal_statistics($event, $ext)
+    {
+        $agent = &$this->queues_status[$event->getQueue()][$ext];
+        $previous = $agent[AGENT_STATE];
+        $new = $event->getStatus();
+
+        if ($previous == RAW_AGENT_RINGING && $new == RAW_AGENT_TALK) {
+            $agent[AGENT_UPTIME] = time();
+            $agent[AGENT_UPCALLS] ++;                
+            $agent[AGENT_ANSWERED_CALLS] ++;
+        } else if ($previous == RAW_AGENT_AVAILABLE && $new == RAW_AGENT_TALK) {
+            $agent[AGENT_UPTIME] = time();
+            $agent[AGENT_UPCALLS] ++;                
+            $agent[AGENT_OUT] ++;
+        } else if ($previous == RAW_AGENT_AVAILABLE && $new == RAW_AGENT_RINGING) {
+            $agent[AGENT_IN] ++;
+        } else if ($previous == RAW_AGENT_TALK && $new == RAW_AGENT_AVAILABLE) {
+            $this->cal_average_talktime($event, $ext);
         }
     }
 
@@ -491,19 +503,10 @@ class Monitor implements IEventListener
             $agent[AGENT_BOUNCED_CALLS] ++;                
         }
         else if ($name == 'AgentConnect') {
-            $agent = &$this->queues_status[$queue][$ext];
-
-            $agent[AGENT_UPTIME] = time();
-            $agent[AGENT_UPCALLS] ++;                
-            $agent[AGENT_ANSWERED_CALLS] ++;            
         }
         else if ($name == 'AgentComplete') {
-            $agent = &$this->queues_status[$queue][$ext];
-            $this->computer_average_talktime($event, $ext);
         }
         else if ($name == 'AgentCalled') {
-            $agent = &$this->queues_status[$queue][$ext];
-            $agent[AGENT_IN] ++;
         }
         else if ($name == "QueueCallerJoin") {
             $caller = new QueueCaller(time(),$queue);
@@ -525,8 +528,8 @@ class Monitor implements IEventListener
             if (!isset($this->queues_status[$queue][$ext])) {
                 $this->init_agent($this->queues_status[$queue][$ext], $ext, $queue);
             }
+            $this->cal_statistics($event,$ext);
             $this->handle_state_change($event, $ext);
-            echo $event->getStatus(), "\n";
         } 
         else if ($name == 'QueueMemberRemoved') {
             $this->handle_state_change($event, $ext);
