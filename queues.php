@@ -444,14 +444,14 @@ function agent_in_queue($queue, $agent)
 function convert_raw_status($raw)
 {
     $raw_to_real = array (
-       RAW_AGENT_AVAILABLE => AGENT_AVAILABLE,
-       RAW_AGENT_RINGING => AGENT_BUSY,
-       RAW_AGENT_TALK => AGENT_BUSY,
-       RAW_AGENT_INVALID => AGENT_NOT_LOGIN,
-       RAW_AGENT_UNAVAILABLE => AGENT_NOT_LOGIN,
-       RAW_AGENT_HOLD => AGENT_HOLD,
-       RAW_AGENT_PAUSED => AGENT_PAUSED,
-   
+        RAW_AGENT_AVAILABLE => AGENT_AVAILABLE,
+        RAW_AGENT_RINGING => AGENT_BUSY,
+        RAW_AGENT_TALK => AGENT_BUSY,
+        RAW_AGENT_INVALID => AGENT_NOT_LOGIN,
+        RAW_AGENT_UNAVAILABLE => AGENT_NOT_LOGIN,
+        RAW_AGENT_HOLD => AGENT_HOLD,
+        RAW_AGENT_PAUSED => AGENT_PAUSED,
+       
     );
 
     return $raw_to_real[$raw];
@@ -559,7 +559,16 @@ function get_agent_status_from_monitor($queue, $agent)
 
 function get_agent_status($queue, $agent)
 {
-    if ($queue == NULL) {
+    $status = get_agent_status_internal($queue, $agent);
+    if ($status != NULL) {
+        $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
+    }
+    return $status;
+}
+
+function get_agent_status_internal($queue, $agent)
+{
+     if ($queue == NULL) {
         $status = get_agents_status_total($agent);
         goto out;
     }
@@ -569,10 +578,7 @@ function get_agent_status($queue, $agent)
     if ($status[AGENT_STARTTIME] != 0)
         $status[AGENT_STATE_DURATION] = time() - $status[AGENT_STARTTIME];
 out:
-    if ($status != NULL) {
-        $status[AGENT_STATE] = convert_raw_status($status[AGENT_STATE]);
-    } 
-    return $status;
+    return $status; 
 }
 
 function get_agents_status_total($agent)
@@ -583,7 +589,7 @@ function get_agents_status_total($agent)
     foreach($queues as $queue) {
         if (!agent_in_queue($queue, $agent)) continue;
         if ($total_status == NULL) {
-            $total_status = get_agent_status($queue, $agent);
+            $total_status = get_agent_status_internal($queue, $agent);
         }
         else {
             $status = get_agent_status($queue, $agent);
