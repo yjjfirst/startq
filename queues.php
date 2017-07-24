@@ -100,6 +100,7 @@ define("RAW_AGENT_HOLD", 8);
 define("RAW_AGENT_PAUSED", 100);
 
 define ("AGENT_AVAILABLE", 1);
+define ("AGENT_UNAVAILABLE", 2);
 define ("AGENT_BUSY", 3);
 define ("AGENT_HOLD", 8);
 define ("AGENT_PAUSED", 100);
@@ -445,7 +446,7 @@ function convert_raw_status($raw)
 {
     $raw_to_real = array (
         RAW_AGENT_AVAILABLE => AGENT_AVAILABLE,
-        RAW_AGENT_RINGING => AGENT_BUSY,
+        RAW_AGENT_RINGING => AGENT_UNAVAILABLE,
         RAW_AGENT_TALK => AGENT_BUSY,
         RAW_AGENT_INVALID => AGENT_NOT_LOGIN,
         RAW_AGENT_UNAVAILABLE => AGENT_NOT_LOGIN,

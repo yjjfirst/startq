@@ -9,7 +9,7 @@ class parser
     public $ini_array,$group_objs,$agent_objs;
 
     private static $_instance=null;
-    public  $state_index=array("available"=>1,"busy"=>3,"hold"=>8,"paused"=>100,"not_login"=>7,);
+    public  $state_index=array("available"=>1,"unavailable"=>2,"busy"=>3,"hold"=>8,"paused"=>100,"not_login"=>7,);
 
     private function __construct()
     {
@@ -202,6 +202,7 @@ class parser
         $state_str[AGENT_AVAILABLE]='Available';
         $state_str[AGENT_BUSY]='Busy';
         $state_str[AGENT_PAUSED]='Paused';
+        $state_str[AGENT_UNAVAILABLE]= 'Unavailable';
         $state_str[AGENT_NOT_LOGIN]='Not logged in Queue';
 
         $ret_str = 'UNKNOWN';
