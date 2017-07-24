@@ -521,8 +521,10 @@ class Monitor implements IEventListener
             }
         }
         else if ($name == 'QueueMemberAdded') {
-            $this->queues_status[$queue][$ext] = array();
-            $this->init_agent($this->queues_status[$queue][$ext], $ext, $queue);
+            if (empty($this->queues_status[$queue][$ext])) {
+                $this->queues_status[$queue][$ext] = array();
+                $this->init_agent($this->queues_status[$queue][$ext], $ext, $queue);
+            }
         }
         else if ($name == 'QueueMemberStatus') {
             if (!isset($this->queues_status[$queue][$ext])) {
