@@ -200,7 +200,8 @@ class Monitor implements IEventListener
         $this->save_vm();
         $this->save_average();
         
-        unlink(LONGEST_WAIT_FILE);
+        $fp = fopen(LONGEST_WAIT_FILE, "w");
+        fclose($fp);
     }
 
     public function init_queues_average()
