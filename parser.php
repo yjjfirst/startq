@@ -89,7 +89,13 @@ class parser
     }
     public function get_group_cloumn_names()
     {
-        return array("Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail");
+        $language = $this->ini_array['asterisk'];
+        $language = $language['language'];
+        if ($language == 'en') {
+            return array("Calls in Queue","Longest Wait Time","Agents Available","Inbound Calls","Answered calls","Average Wait Time","Abandoned Calls","Transferred to voicemail");
+        } else {
+            return array("Appels en attente", "Temps d'attente le plus lon", "Agents disponible", "Appels entrants", "Appels repondus", "Temps d'attente moyen", "Appels abandonn", "Transfer boite vocale");
+        }
     }
     public function get_groups_objs()
     {
@@ -148,7 +154,13 @@ class parser
     }
     public function get_agent_cloumn_names()
     {
-        return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Outgoing Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
+        $language = $this->ini_array['asterisk'];
+        $language = $language['language'];
+        if ($language == 'en') {
+            return array("Agents","ACD STATE","ACD State Start Time","ACD State Duration","Inbound Calls","Outgoing Calls","Answered Calls","Bounced Calls","Transferred Calls","Average Call Duration");
+        } else {
+            return array("Agents","Statut Agents","Debut Queue","Temps Queue","Appels entrants","Appels sortants","Appels repondus","Appels Abandonn","Appels transfer","Durer moyenne des appels");
+        }
     }
     public function get_agents_objs()
     {
