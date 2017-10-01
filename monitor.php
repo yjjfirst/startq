@@ -424,17 +424,17 @@ class Monitor implements IEventListener
         $new = $event->getStatus();
 
         if ($previous == RAW_AGENT_RINGING && $new == RAW_AGENT_TALK) {
-            $agent[AGENT_UPTIME] = time();
-            $agent[AGENT_UPCALLS] ++;                
-            $agent[AGENT_ANSWERED_CALLS] ++;
+            //$agent[AGENT_UPTIME] = time();
+            //$agent[AGENT_UPCALLS] ++;                
+            //$agent[AGENT_ANSWERED_CALLS] ++;
         } else if ($previous == RAW_AGENT_AVAILABLE && $new == RAW_AGENT_TALK) {
             $agent[AGENT_UPTIME] = time();
             $agent[AGENT_UPCALLS] ++;                
             $agent[AGENT_OUT] ++;
         } else if ($previous == RAW_AGENT_AVAILABLE && $new == RAW_AGENT_RINGING) {
-            $agent[AGENT_IN] ++;
+            //$agent[AGENT_IN] ++;
         } else if ($previous == RAW_AGENT_TALK && $new == RAW_AGENT_AVAILABLE) {
-            $this->cal_average_talktime($event, $ext);
+            //$this->cal_average_talktime($event, $ext);
         }
     }
 
@@ -504,10 +504,24 @@ class Monitor implements IEventListener
             $agent[AGENT_BOUNCED_CALLS] ++;                
         }
         else if ($name == 'AgentConnect') {
+           $queue = $event->getQueue();
+           $ext = $this->get_event_ext($event);
+           $agent = &$this->queues_status[$event->getQueue()][$ext];
+           $agent[AGENT_UPTIME] = time();
+           $agent[AGENT_UPCALLS] ++;       
+           $agent[AGENT_ANSWERED_CALLS] ++;
         }
         else if ($name == 'AgentComplete') {
-        }
+           $queue = $event->getQueue();
+           $ext = $this->get_event_ext($event);
+           $this->cal_average_talktime($event, $ext);
+       }
         else if ($name == 'AgentCalled') {
+           $queue = $event->getQueue();
+           $ext = $this->get_event_ext($event);
+           $agent = &$this->queues_status[$event->getQueue()][$ext];
+           $agent[AGENT_IN] ++;
+
         }
         else if ($name == "QueueCallerJoin") {
             $caller = new QueueCaller(time(),$queue);
