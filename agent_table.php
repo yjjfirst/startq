@@ -86,10 +86,26 @@ $agents=$agent_table->get_array_objs();
             {
                 $__value = $parser->get_agent_state_str($number[0]);
             }
+            else if ($_index == 1) 
+            {
+                if ($number[0] != AGENT_NOT_LOGIN)
+                    $__value = "Logged in at " . $item;
+                else
+                    $__value = "Logged out at " . $item;
+            }
+            else if ($_index == 2)
+            {
+                if ($number[0] != AGENT_NOT_LOGIN)
+                    $__value = "Logged in for " . $item . " hours";
+                else
+                    $__value = "Logoed out for " . $item . " hours";
+            }
             else
             {
                 $__value = $item;
             }
+
+
 ?>
                         <td <?php echo $td_class?>><?php echo $__value?></td>
 <?php

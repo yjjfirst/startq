@@ -34,14 +34,14 @@ class xtable
 
         if($year > 1970)
         {
-            $date_str = date('Y-m-d H:i:s', (int)$secs);             
+            $date_str = date('H:i A', (int)$secs);             
         }
         else
         {
             $hour = floor($secs/3600);
             $minute = floor(($secs-3600*$hour)/60);
             $second = floor((($secs-3600*$hour)-60*$minute)%60);
-            $date_str= sprintf("%02d:%02d:%02d", $hour,$minute,$second);
+            $date_str= sprintf("%d", $hour);
         }
         return $date_str;
     }
