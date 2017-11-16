@@ -99,8 +99,13 @@ for($i=0;$i<count($groups);next($groups),$i++)
             {
                 $td_class = $td_class_org;
             }
+
+            $value = $group_table->convert_format($_index, $item);
+            if ($_index == 1 || $_index == 5) {
+                $value = $group_table->second_2_string($value);
+            }
 ?>
-            <td <?php echo $td_class?>><?php echo $group_table->convert_format($_index, $item)?></td>
+            <td <?php echo $td_class?>><?php echo $value?></td>
 <?php
         }
 ?>
@@ -137,9 +142,13 @@ for($i=0;$i<count($groups);next($groups),$i++)
             {
                 $td_class = $td_class_org;
             }
+            $value = $group_table->convert_format($_index, $item);
+            if ($_index == 1 || $_index == 5) {
+                $value = $group_table->second_2_string($value);
+            }
 
 ?>
-            <td <?php echo $td_class?>><?php echo $group_table->convert_format($_index, $item)?></td>
+            <td <?php echo $td_class?>><?php echo $value?></td>
 <?php
         }
     }

@@ -85,7 +85,7 @@ class parser
     }
     public function get_group_time_items()
     {
-        return array(1,5);
+        return array();
     }
     public function get_group_cloumn_names()
     {
@@ -150,7 +150,7 @@ class parser
     }
     public function get_agent_time_items()
     {
-        return array(1,2,8);
+        return array(1,2);
     }
     public function get_agent_cloumn_names()
     {

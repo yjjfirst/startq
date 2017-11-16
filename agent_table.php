@@ -100,6 +100,10 @@ $agents=$agent_table->get_array_objs();
                 else
                     $__value = "Logoed out for " . $item . " hours";
             }
+            else if ($_index == 8) 
+            {
+                $__value = $agent_table->second_2_string($item);
+            }
             else
             {
                 $__value = $item;

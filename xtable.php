@@ -22,6 +22,16 @@ class xtable
         }
     }
 
+    public function second_2_string($secs)
+    {
+        $hour = floor($secs/3600);
+        $minute = floor(($secs-3600*$hour)/60);
+        $second = floor((($secs-3600*$hour)-60*$minute)%60);
+        $str= sprintf("%d:%d:%d", $hour,$minute,$second);
+ 
+        return $str;
+    }
+
     private function _time_strformat($secs) 
     {
         if(!is_numeric($secs))
