@@ -128,7 +128,7 @@ for($i=0;$i<count($groups);next($groups),$i++)
     {
 ?>
         <tr>
-        <td <?php echo $td_class?>><?php echo $group_name." Total"?></td>
+        <td nowrap="nowrap" <?php echo $td_class?>><?php echo $group_name." Total"?></td>
 <?php
         foreach($total_items as $_index=>$item)
         {

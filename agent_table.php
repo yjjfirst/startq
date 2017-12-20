@@ -51,9 +51,11 @@ $agents=$agent_table->get_array_objs();
         }
 
         $agent_name = $agent_table->get_agent_queue_name($rows-1,$item_name);
+        $agent_name_tmp = explode("-",$agent_name);
+        $agent_name = $agent_name_tmp[1];
 ?>
-                <tr>
-                    <td <?php echo $td_class?>><?php echo $agent_name?></td>
+        <tr>
+            <td <?php echo $td_class?>><?php echo $agent_name?></td>
 <?php
         $number=$agents["$item_name"];
         $number = $agent_table->secs_to_strtime($number);
@@ -98,7 +100,7 @@ $agents=$agent_table->get_array_objs();
                 if ($number[0] != AGENT_NOT_LOGIN)
                     $__value = "Logged in for " . $item . " hours";
                 else
-                    $__value = "Logoed out for " . $item . " hours";
+                    $__value = "Logoed out";
             }
             else if ($_index == 8) 
             {
